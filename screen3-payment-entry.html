@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ERP Module — Payment Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy:      #2a3547;
+    --navy-deep: #1e2a38;
+    --navy-mid:  #344155;
+    --gold:      #c9a227;
+    --gold-light:#d9b84a;
+    --gold-muted:#e8d08a;
+    --slate:     #b0b8c1;
+    --slate-mid: #8a95a3;
+    --cream:     #f0ede6;
+    --cream-dark:#e8e4db;
+    --white:     #ffffff;
+    --text-dark: #1e2a38;
+    --text-mid:  #4a5568;
+    --text-muted:#7a8699;
+    --border:    #d4d9e0;
+    --border-dark:#c0c7d0;
+    --input-bg:  #faf9f7;
+    --card-bg:   #ffffff;
+    --page-bg:   #f4f2ee;
+    --success:   #16a34a;
+    --success-bg:#f0fdf4;
+    --success-border:#bbf7d0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--page-bg); color: var(--text-dark); min-height: 100vh; }
+
+  /* NAV */
+  .nav { background: var(--navy-deep); height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; border-bottom: 1px solid rgba(201,162,39,0.25); position: sticky; top: 0; z-index: 100; }
+  .nav-brand { display: flex; align-items: center; gap: 14px; }
+  .nav-logo { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo svg { width: 20px; height: 20px; }
+  .nav-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--white); }
+  .nav-subtitle { font-size: 11px; color: var(--slate); letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-module { font-size: 12px; font-weight: 500; color: var(--gold-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .nav-avatar { width: 34px; height: 34px; background: var(--navy-mid); border: 1.5px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--gold); }
+
+  /* BREADCRUMB */
+  .breadcrumb { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; height: 44px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+  .breadcrumb a { color: var(--gold); text-decoration: none; }
+  .breadcrumb span { color: var(--slate-mid); }
+
+  /* STEPPER */
+  .stepper-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; height: 68px; display: flex; align-items: center; }
+  .stepper { display: flex; align-items: center; }
+  .step { display: flex; align-items: center; gap: 10px; cursor: default; }
+  .step-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; border: 2px solid transparent; }
+  .step-dot.active { background: var(--gold); color: var(--navy-deep); border-color: var(--gold); }
+  .step-dot.done { background: var(--success); color: white; border-color: var(--success); }
+  .step-dot.inactive { background: transparent; color: var(--slate-mid); border-color: var(--border-dark); }
+  .step-label { font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .step-label.active { color: var(--text-dark); }
+  .step-label.done { color: var(--success); }
+  .step-label.inactive { color: var(--text-muted); }
+  .step-line { width: 80px; height: 1px; background: var(--border); margin: 0 16px; flex-shrink: 0; }
+  .step-line.done { background: var(--success); }
+
+  /* MAIN */
+  .main { max-width: 1280px; margin: 32px auto; padding: 0 32px 60px; display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+
+  .page-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; grid-column: 1 / -1; }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; color: var(--text-dark); }
+  .page-tag { font-size: 11px; font-weight: 500; color: var(--gold); background: rgba(201,162,39,0.1); border: 1px solid rgba(201,162,39,0.25); padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* INVOICE SUMMARY BANNER */
+  .invoice-banner { grid-column: 1 / -1; background: var(--navy-deep); border-radius: 10px; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .invoice-banner-left { display: flex; align-items: center; gap: 28px; }
+  .banner-item {}
+  .banner-label { font-size: 10px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+  .banner-value { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--cream); }
+  .banner-value.gold { color: var(--gold); font-size: 18px; }
+  .banner-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.08); }
+  .badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+  .badge-approved { background: rgba(22,163,74,0.15); color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
+
+  /* CARD */
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(30,42,56,0.06); }
+  .section { padding: 28px 36px; border-bottom: 1px solid var(--cream-dark); }
+  .section:last-child { border-bottom: none; }
+  .section-title { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--cream-dark); }
+
+  .field-grid { display: grid; gap: 16px 20px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  .field-label .req { color: var(--gold); margin-left: 2px; }
+  .field-hint { font-size: 11px; color: var(--slate-mid); margin-top: 2px; }
+
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--text-dark); outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none;
+  }
+  input::placeholder, textarea::placeholder { color: var(--slate-mid); }
+  input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,162,39,0.1); background: var(--white); }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a95a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer;
+  }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* READ ONLY FIELD */
+  .field-readonly {
+    background: var(--cream);
+    border: 1px solid var(--cream-dark);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dark);
+    font-weight: 500;
+  }
+
+  /* AMOUNT HIGHLIGHT */
+  .amount-large {
+    background: var(--navy-deep);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .amount-large-label { font-size: 10px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .amount-large-value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--gold); }
+  .amount-large-sub { font-size: 11px; color: var(--slate-mid); margin-top: 4px; font-style: italic; }
+
+  /* BALANCE STRIP */
+  .balance-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: var(--navy-deep); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+  .balance-item { padding: 16px 20px; border-right: 1px solid rgba(255,255,255,0.07); }
+  .balance-item:last-child { border-right: none; }
+  .balance-label { font-size: 10px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .balance-value { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--cream); }
+  .balance-value.green { color: #4ade80; }
+  .balance-value.red { color: #f87171; }
+
+  /* SIDE PANEL */
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .side-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(30,42,56,0.06); }
+  .side-card-header { padding: 16px 20px; border-bottom: 1px solid var(--cream-dark); }
+  .side-card-title { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+  .side-card-body { padding: 16px 20px; }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--cream-dark); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row-label { font-size: 12px; color: var(--text-muted); }
+  .summary-row-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text-dark); }
+  .summary-row-value.gold { color: var(--gold); font-size: 15px; }
+  .summary-row-value.green { color: var(--success); }
+  .summary-row-value.red { color: #dc2626; }
+
+  .timeline-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+  .timeline-dot.green { background: var(--success); }
+  .timeline-content {}
+  .timeline-label { font-size: 12px; font-weight: 500; color: var(--text-dark); }
+  .timeline-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ACTIONS */
+  .actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 20px 36px 28px; background: var(--card-bg); border-top: 1px solid var(--cream-dark); }
+  .actions-left { font-size: 12px; color: var(--text-muted); }
+  .actions-right { display: flex; gap: 10px; }
+  .btn { border-radius: 7px; padding: 10px 22px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500; cursor: pointer; letter-spacing: 0.01em; transition: all 0.15s; border: 1px solid transparent; }
+  .btn-ghost { background: transparent; border-color: var(--border-dark); color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--cream-dark); color: var(--text-dark); }
+  .btn-secondary { background: transparent; border-color: var(--navy); color: var(--navy); }
+  .btn-secondary:hover { background: var(--navy-deep); color: var(--cream); }
+  .btn-primary { background: var(--gold); border-color: var(--gold); color: var(--navy-deep); font-weight: 600; }
+  .btn-primary:hover { background: var(--gold-light); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo" style="background: var(--white); overflow: hidden;">
+      <img src="logo.jpg" alt="Digiketing Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;" />
+    </div>
+    <div>
+      <div class="nav-title">digiketing software consulting ltd</div>
+      <div class="nav-subtitle">Enterprise Resource Planning</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-module">Accounts Payable Module</div>
+    <div class="nav-avatar">AP</div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="#">Dashboard</a>
+  <span>›</span>
+  <a href="#">Accounts Payable</a>
+  <span>›</span>
+  <a href="screen1-id-creation.html">Create Invoice ID</a>
+  <span>›</span>
+  <a href="screen2-invoice-entry.html">Invoice Entry</a>
+  <span>›</span>
+  <span style="color: var(--text-dark); font-weight: 500;">Payment Entry</span>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper-bar">
+  <div class="stepper">
+    <div class="step">
+      <div class="step-dot done">✓</div>
+      <span class="step-label done">Draft</span>
+    </div>
+    <div class="step-line done"></div>
+    <div class="step">
+      <div class="step-dot done">✓</div>
+      <span class="step-label done">Submitted</span>
+    </div>
+    <div class="step-line done"></div>
+    <div class="step">
+      <div class="step-dot done">✓</div>
+      <span class="step-label done">Approved</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-dot active">4</div>
+      <span class="step-label active">Posted to GL</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main style="max-width:1280px; margin:32px auto; padding:0 32px 60px;">
+
+  <div class="page-header" style="margin-bottom:20px;">
+    <div class="page-title">Payment Entry</div>
+    <div class="page-tag">Step 3 of 3</div>
+  </div>
+
+  <!-- Invoice Summary Banner -->
+  <div class="invoice-banner" style="margin-bottom:24px;">
+    <div class="invoice-banner-left">
+      <div class="banner-item">
+        <div class="banner-label">Invoice ID</div>
+        <div class="banner-value gold">INV-2025-00142</div>
+      </div>
+      <div class="banner-divider"></div>
+      <div class="banner-item">
+        <div class="banner-label">Vendor</div>
+        <div class="banner-value">Pharma Wholesale Pvt Ltd</div>
+      </div>
+      <div class="banner-divider"></div>
+      <div class="banner-item">
+        <div class="banner-label">Invoice Date</div>
+        <div class="banner-value">31-07-2024</div>
+      </div>
+      <div class="banner-divider"></div>
+      <div class="banner-item">
+        <div class="banner-label">Due Date</div>
+        <div class="banner-value" style="color:#f87171;">15-08-2024</div>
+      </div>
+      <div class="banner-divider"></div>
+      <div class="banner-item">
+        <div class="banner-label">Invoice Total</div>
+        <div class="banner-value gold">₹3,245.00</div>
+      </div>
+      <div class="banner-divider"></div>
+      <div class="banner-item">
+        <div class="banner-label">Status</div>
+        <div class="badge badge-approved">Approved</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start;">
+
+    <!-- LEFT — PAYMENT FORM -->
+    <div class="card">
+
+      <!-- Payment Details -->
+      <div class="section">
+        <div class="section-title">Payment Details</div>
+        <div class="field-grid grid-3">
+          <div class="field">
+            <label class="field-label">Payment Reference No. <span class="req">*</span></label>
+            <input type="text" placeholder="e.g. PAY-2025-00089" />
+          </div>
+          <div class="field">
+            <label class="field-label">Payment Date <span class="req">*</span></label>
+            <input type="date" />
+          </div>
+          <div class="field">
+            <label class="field-label">Payment Mode <span class="req">*</span></label>
+            <select>
+              <option value="" disabled selected>Select mode</option>
+              <option>NEFT</option>
+              <option>RTGS</option>
+              <option>IMPS</option>
+              <option>Cheque</option>
+              <option>Cash</option>
+              <option>UPI</option>
+              <option>Bank Transfer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Payment Amount (₹) <span class="req">*</span></label>
+            <input type="number" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label class="field-label">Currency</label>
+            <select>
+              <option>INR — Indian Rupee</option>
+              <option>USD — US Dollar</option>
+              <option>EUR — Euro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Exchange Rate</label>
+            <input type="number" value="1.00" step="0.0001" />
+            <span class="field-hint">1.00 for INR payments</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Transfer Details -->
+      <div class="section">
+        <div class="section-title">Bank Transfer Details</div>
+        <div class="field-grid grid-3">
+          <div class="field">
+            <label class="field-label">Transaction / UTR No.</label>
+            <input type="text" placeholder="12-digit UTR number" />
+            <span class="field-hint">Required for NEFT / RTGS / IMPS</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Paying Bank</label>
+            <input type="text" placeholder="e.g. HDFC Bank" />
+          </div>
+          <div class="field">
+            <label class="field-label">Paying Account No.</label>
+            <input type="text" placeholder="Account number" />
+          </div>
+          <div class="field">
+            <label class="field-label">Cheque No.</label>
+            <input type="text" placeholder="If payment by cheque" />
+          </div>
+          <div class="field">
+            <label class="field-label">Cheque Date</label>
+            <input type="date" />
+          </div>
+          <div class="field">
+            <label class="field-label">Cheque Bank</label>
+            <input type="text" placeholder="Issuing bank name" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendor Bank Details (Read Only — pulled from Invoice) -->
+      <div class="section">
+        <div class="section-title">Vendor Bank Details</div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Auto-filled from Invoice Entry. Verify before processing payment.</p>
+        <div class="field-grid grid-4">
+          <div class="field">
+            <label class="field-label">Bank Name</label>
+            <div class="field-readonly">Punjab & Sind Bank</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Account Number</label>
+            <div class="field-readonly">06261100054752</div>
+          </div>
+          <div class="field">
+            <label class="field-label">IFSC Code</label>
+            <div class="field-readonly">PSIB0000626</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Branch</label>
+            <div class="field-readonly">Geeta Colony</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deductions & Adjustments -->
+      <div class="section">
+        <div class="section-title">Deductions & Adjustments</div>
+        <div class="field-grid grid-3">
+          <div class="field">
+            <label class="field-label">TDS Amount (₹)</label>
+            <input type="number" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label class="field-label">TDS Section</label>
+            <select>
+              <option value="" disabled selected>Select section</option>
+              <option>Section 194C — Contractor</option>
+              <option>Section 194J — Professional</option>
+              <option>Section 194H — Commission</option>
+              <option>Not Applicable</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Discount / Advance Adjusted (₹)</label>
+            <input type="number" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label class="field-label">Other Deductions (₹)</label>
+            <input type="number" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label class="field-label">Deduction Reason</label>
+            <input type="text" placeholder="Reason for deduction if any" />
+          </div>
+        </div>
+
+        <!-- Balance Strip -->
+        <div class="balance-strip">
+          <div class="balance-item">
+            <div class="balance-label">Invoice Total</div>
+            <div class="balance-value">₹3,245.00</div>
+          </div>
+          <div class="balance-item">
+            <div class="balance-label">Total Deductions</div>
+            <div class="balance-value red">− ₹0.00</div>
+          </div>
+          <div class="balance-item">
+            <div class="balance-label">Net Payable</div>
+            <div class="balance-value green">₹3,245.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GL Posting -->
+      <div class="section">
+        <div class="section-title">GL Posting Details</div>
+        <div class="field-grid grid-3">
+          <div class="field">
+            <label class="field-label">Debit Account (GL) <span class="req">*</span></label>
+            <select>
+              <option value="" disabled selected>Select account</option>
+              <option>2000 — Trade Payables</option>
+              <option>2100 — Sundry Creditors</option>
+              <option>2200 — Advance to Vendors</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Credit Account (GL) <span class="req">*</span></label>
+            <select>
+              <option value="" disabled selected>Select account</option>
+              <option>1000 — Cash & Bank</option>
+              <option>1100 — HDFC Current Account</option>
+              <option>1200 — ICICI Current Account</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Cost Center</label>
+            <select>
+              <option value="" disabled selected>Select cost center</option>
+              <option>CC-001 — Head Office</option>
+              <option>CC-002 — Branch Operations</option>
+              <option>CC-003 — IT Infrastructure</option>
+            </select>
+          </div>
+          <div class="field col-span-2">
+            <label class="field-label">Narration</label>
+            <input type="text" placeholder="e.g. Payment against Invoice INV-2025-00142 to Pharma Wholesale Pvt Ltd" />
+          </div>
+          <div class="field">
+            <label class="field-label">Posting Period</label>
+            <select>
+              <option>July 2024</option>
+              <option>August 2024</option>
+              <option>September 2024</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div class="section">
+        <div class="section-title">Remarks & Attachments</div>
+        <div class="field-grid grid-2" style="margin-bottom:16px;">
+          <div class="field col-span-2">
+            <label class="field-label">Payment Remarks</label>
+            <textarea placeholder="Any notes regarding this payment..."></textarea>
+          </div>
+        </div>
+        <div style="border: 2px dashed var(--border-dark); border-radius: 8px; padding: 24px; text-align:center; color:var(--text-muted);">
+          <div style="font-size:13px; font-weight:500; margin-bottom:4px;">Drag & drop payment proof here</div>
+          <div style="font-size:12px;">Bank receipt, UTR screenshot, cheque scan (PDF, JPG, PNG)</div>
+          <button style="margin-top:12px; background:transparent; border:1px solid var(--border-dark); border-radius:6px; padding:7px 16px; font-size:12.5px; cursor:pointer; color:var(--text-mid); font-family:'DM Sans',sans-serif;">Browse Files</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <div class="actions-left">Step 3 of 3 — Payment Entry & GL Posting</div>
+        <div class="actions-right">
+          <button class="btn btn-ghost">Cancel</button>
+          <button class="btn btn-secondary">Save Draft</button>
+          <button class="btn btn-primary">Post Payment to GL ✓</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE PANEL -->
+    <div class="side-panel">
+
+      <!-- Invoice Summary -->
+      <div class="side-card">
+        <div class="side-card-header">
+          <div class="side-card-title">Invoice Summary</div>
+        </div>
+        <div class="side-card-body">
+          <div class="summary-row">
+            <span class="summary-row-label">Taxable Value</span>
+            <span class="summary-row-value">₹2,750.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">CGST (9%)</span>
+            <span class="summary-row-value">₹247.50</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">SGST (9%)</span>
+            <span class="summary-row-value">₹247.50</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">IGST</span>
+            <span class="summary-row-value">₹0.00</span>
+          </div>
+          <div class="summary-row" style="border-top:2px solid var(--cream-dark); margin-top:4px; padding-top:12px;">
+            <span class="summary-row-label" style="font-weight:600; color:var(--text-dark);">Invoice Total</span>
+            <span class="summary-row-value gold">₹3,245.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Paid Till Date</span>
+            <span class="summary-row-value green">₹0.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label" style="font-weight:600; color:var(--text-dark);">Balance Due</span>
+            <span class="summary-row-value" style="color:#dc2626; font-size:15px;">₹3,245.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Timeline -->
+      <div class="side-card">
+        <div class="side-card-header">
+          <div class="side-card-title">Invoice Timeline</div>
+        </div>
+        <div class="side-card-body">
+          <div class="timeline-item">
+            <div class="timeline-dot green"></div>
+            <div class="timeline-content">
+              <div class="timeline-label">Invoice ID Created</div>
+              <div class="timeline-sub">Today, 10:42 AM · AP Clerk</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot green"></div>
+            <div class="timeline-content">
+              <div class="timeline-label">Invoice Submitted</div>
+              <div class="timeline-sub">Today, 11:15 AM · AP Clerk</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot green"></div>
+            <div class="timeline-content">
+              <div class="timeline-label">Approved by Manager</div>
+              <div class="timeline-sub">Today, 2:30 PM · AP Manager</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-label" style="color:var(--gold);">Payment Pending</div>
+              <div class="timeline-sub">Awaiting payment entry</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vendor Info -->
+      <div class="side-card">
+        <div class="side-card-header">
+          <div class="side-card-title">Vendor Info</div>
+        </div>
+        <div class="side-card-body" style="font-size:12.5px;">
+          <div style="font-weight:600; color:var(--text-dark); margin-bottom:4px;">Pharma Wholesale Pvt Ltd</div>
+          <div style="color:var(--text-muted); margin-bottom:8px;">GSTIN: 07CTMPM6999K1ZJ</div>
+          <div style="color:var(--text-muted); margin-bottom:12px;">13-2-47, Opp Gowdiyamatam, Delhi</div>
+          <div class="summary-row">
+            <span class="summary-row-label">Payment Terms</span>
+            <span class="summary-row-value" style="font-size:12px;">Net 15</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row-label">Outstanding (All)</span>
+            <span class="summary-row-value" style="color:#dc2626; font-size:12px;">₹3,245.00</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

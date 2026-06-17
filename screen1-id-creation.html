@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ERP Module — Create Invoice ID</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy:      #2a3547;
+    --navy-deep: #1e2a38;
+    --navy-mid:  #344155;
+    --gold:      #c9a227;
+    --gold-light:#d9b84a;
+    --gold-muted:#e8d08a;
+    --slate:     #b0b8c1;
+    --slate-mid: #8a95a3;
+    --cream:     #f0ede6;
+    --cream-dark:#e8e4db;
+    --white:     #ffffff;
+    --text-dark: #1e2a38;
+    --text-mid:  #4a5568;
+    --text-muted:#7a8699;
+    --border:    #d4d9e0;
+    --border-dark:#c0c7d0;
+    --input-bg:  #faf9f7;
+    --card-bg:   #ffffff;
+    --page-bg:   #f4f2ee;
+    --success:   #16a34a;
+    --success-bg:#f0fdf4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  .nav {
+    background: var(--navy-deep);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 1px solid rgba(201,162,39,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 14px; }
+  .nav-logo {
+    width: 36px; height: 36px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-logo svg { width: 20px; height: 20px; }
+  .nav-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--white); }
+  .nav-subtitle { font-size: 11px; color: var(--slate); letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-module { font-size: 12px; font-weight: 500; color: var(--gold-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .nav-avatar {
+    width: 34px; height: 34px;
+    background: var(--navy-mid);
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+  }
+
+  /* BREADCRUMB */
+  .breadcrumb {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .breadcrumb a { color: var(--gold); text-decoration: none; }
+  .breadcrumb span { color: var(--slate-mid); }
+
+  /* MAIN */
+  .main {
+    max-width: 860px;
+    margin: 40px auto;
+    padding: 0 32px 80px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+  .page-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold);
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.25);
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .page-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(30,42,56,0.06);
+  }
+
+  .section {
+    padding: 28px 36px;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--cream-dark);
+  }
+
+  .field-grid { display: grid; gap: 16px 20px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .field-label .req { color: var(--gold); margin-left: 2px; }
+  .field-hint {
+    font-size: 11px;
+    color: var(--slate-mid);
+    margin-top: 2px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select, textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input::placeholder, textarea::placeholder { color: var(--slate-mid); }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,162,39,0.1);
+    background: var(--white);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a95a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+
+  /* ID PREVIEW BOX */
+  .id-preview {
+    background: var(--navy-deep);
+    border-radius: 10px;
+    padding: 28px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 24px 0 0;
+  }
+  .id-preview-left {}
+  .id-preview-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .id-preview-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .id-preview-sub {
+    font-size: 12px;
+    color: var(--slate-mid);
+    margin-top: 6px;
+  }
+  .btn-generate {
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-generate:hover { background: var(--gold-light); }
+  .btn-generate svg { width: 16px; height: 16px; }
+
+  /* INFO STRIP */
+  .info-strip {
+    background: rgba(201,162,39,0.05);
+    border: 1px solid rgba(201,162,39,0.2);
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .info-strip svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+  .info-strip-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
+
+  /* STATUS BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .badge-pending {
+    background: rgba(201,162,39,0.12);
+    color: #9a7a18;
+    border: 1px solid rgba(201,162,39,0.3);
+  }
+
+  /* ACTIONS */
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 20px 36px 28px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--cream-dark);
+  }
+  .actions-left { font-size: 12px; color: var(--text-muted); }
+  .actions-right { display: flex; gap: 10px; }
+  .btn {
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border-dark);
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { background: var(--cream-dark); color: var(--text-dark); }
+  .btn-primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--navy-deep);
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+  .btn-secondary:hover { background: var(--navy-deep); color: var(--cream); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo" style="background: var(--white); overflow: hidden;">
+      <img src="logo.jpg" alt="Digiketing Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;" />
+    </div>
+    <div>
+      <div class="nav-title">digiketing software consulting ltd</div>
+      <div class="nav-subtitle">Enterprise Resource Planning</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-module">Accounts Payable Module</div>
+    <div class="nav-avatar">AP</div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="#">Dashboard</a>
+  <span>›</span>
+  <a href="#">Accounts Payable</a>
+  <span>›</span>
+  <span style="color: var(--text-dark); font-weight: 500;">Create Invoice ID</span>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">Create Invoice ID</div>
+    <div class="page-tag">Step 1 of 3</div>
+  </div>
+  <p class="page-desc">Fill in the details below to generate a unique Invoice ID. This ID will be used to track the invoice through the entire payment cycle — from entry to approval to GL posting.</p>
+
+  <div class="card">
+
+    <!-- Invoice Classification -->
+    <div class="section">
+      <div class="section-title">Invoice Classification</div>
+      <div class="field-grid grid-3">
+        <div class="field">
+          <label class="field-label">Financial Year <span class="req">*</span></label>
+          <select>
+            <option>2024-25</option>
+            <option>2025-26</option>
+            <option>2026-27</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Invoice Type <span class="req">*</span></label>
+          <select>
+            <option value="" disabled selected>Select type</option>
+            <option>Tax Invoice</option>
+            <option>Proforma Invoice</option>
+            <option>Credit Note</option>
+            <option>Debit Note</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Department <span class="req">*</span></label>
+          <select>
+            <option value="" disabled selected>Select department</option>
+            <option>Procurement</option>
+            <option>Operations</option>
+            <option>IT</option>
+            <option>Finance</option>
+            <option>HR</option>
+            <option>Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Cost Center</label>
+          <select>
+            <option value="" disabled selected>Select cost center</option>
+            <option>CC-001 — Head Office</option>
+            <option>CC-002 — Branch Operations</option>
+            <option>CC-003 — IT Infrastructure</option>
+            <option>CC-004 — Marketing</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Business Unit</label>
+          <select>
+            <option value="" disabled selected>Select unit</option>
+            <option>BU-01 — Retail</option>
+            <option>BU-02 — Wholesale</option>
+            <option>BU-03 — Export</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Priority</label>
+          <select>
+            <option>Normal</option>
+            <option>High</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor & Reference -->
+    <div class="section">
+      <div class="section-title">Vendor & Reference</div>
+      <div class="field-grid grid-3">
+        <div class="field">
+          <label class="field-label">Vendor Name <span class="req">*</span></label>
+          <input type="text" placeholder="Company / Supplier name" />
+        </div>
+        <div class="field">
+          <label class="field-label">Vendor Code</label>
+          <input type="text" placeholder="e.g. VND-0042" />
+          <span class="field-hint">Auto-assigned if left blank</span>
+        </div>
+        <div class="field">
+          <label class="field-label">PO Reference</label>
+          <input type="text" placeholder="Purchase Order #" />
+        </div>
+        <div class="field">
+          <label class="field-label">Vendor Invoice No. <span class="req">*</span></label>
+          <input type="text" placeholder="As printed on vendor's invoice" />
+        </div>
+        <div class="field">
+          <label class="field-label">Vendor Invoice Date <span class="req">*</span></label>
+          <input type="date" />
+        </div>
+        <div class="field">
+          <label class="field-label">Approximate Amount (₹)</label>
+          <input type="number" placeholder="0.00" min="0" step="0.01" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ID Format & Preview -->
+    <div class="section">
+      <div class="section-title">ID Configuration</div>
+      <div class="field-grid grid-3" style="margin-bottom: 0;">
+        <div class="field">
+          <label class="field-label">ID Prefix <span class="req">*</span></label>
+          <input type="text" placeholder="e.g. INV" value="INV" />
+          <span class="field-hint">2–5 uppercase letters</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Series / Sequence</label>
+          <select>
+            <option>Auto (system assigned)</option>
+            <option>Manual entry</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Manual Sequence No.</label>
+          <input type="number" placeholder="e.g. 001" min="1" />
+          <span class="field-hint">Only if manual series selected</span>
+        </div>
+      </div>
+
+      <!-- Generated ID Preview -->
+      <div class="id-preview">
+        <div class="id-preview-left">
+          <div class="id-preview-label">Generated Invoice ID</div>
+          <div class="id-preview-value">INV-2025-00142</div>
+          <div class="id-preview-sub">Format: PREFIX — FINANCIAL YEAR — SEQUENCE</div>
+        </div>
+        <button class="btn-generate">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 2L9 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Generate ID
+        </button>
+      </div>
+
+      <div class="info-strip">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="info-strip-text">This Invoice ID will be permanently assigned and cannot be changed after confirmation. It will be used across invoice entry, approval, payment processing, and GL posting screens.</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="section">
+      <div class="section-title">Internal Notes</div>
+      <div class="field">
+        <textarea placeholder="Any internal notes or context for this invoice (optional)..." style="min-height: 80px;"></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <div class="actions-left">Step 1 of 3 — Invoice ID Creation</div>
+      <div class="actions-right">
+        <button class="btn btn-ghost">Cancel</button>
+        <button class="btn btn-secondary">Save Draft</button>
+        <button class="btn btn-primary">Confirm & Proceed to Invoice Entry →</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

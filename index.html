@@ -1,0 +1,3199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>digiketing software consulting ltd — Accounts Payable Module</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy:      #2a3547;
+    --navy-deep: #1e2a38;
+    --navy-mid:  #344155;
+    --gold:      #c9a227;
+    --gold-light:#d9b84a;
+    --gold-muted:#e8d08a;
+    --slate:     #b0b8c1;
+    --slate-mid: #8a95a3;
+    --cream:     #f0ede6;
+    --cream-dark:#e8e4db;
+    --white:     #ffffff;
+    --text-dark: #1e2a38;
+    --text-mid:  #4a5568;
+    --text-muted:#7a8699;
+    --border:    #d4d9e0;
+    --border-dark:#c0c7d0;
+    --input-bg:  #faf9f7;
+    --card-bg:   #ffffff;
+    --page-bg:   #f4f2ee;
+    --success:   #16a34a;
+    --success-bg:#f0fdf4;
+    --success-border:#bbf7d0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--page-bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* ── STICKY NAV ── */
+  .nav {
+    background: var(--navy-deep);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 1px solid rgba(201,162,39,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 14px; }
+  .nav-logo {
+    width: 36px; height: 36px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-logo svg { width: 20px; height: 20px; }
+  .nav-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--white); letter-spacing: 0.01em; }
+  .nav-subtitle { font-size: 11px; font-weight: 400; color: var(--slate); letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-module { font-size: 12px; font-weight: 500; color: var(--gold-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .nav-avatar {
+    width: 34px; height: 34px;
+    background: var(--navy-mid);
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .breadcrumb a { color: var(--gold); text-decoration: none; font-weight: 500; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { color: var(--slate-mid); }
+
+  /* ── STEPPER BAR ── */
+  .stepper-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+  }
+  .stepper { display: flex; align-items: center; }
+  .step { display: flex; align-items: center; gap: 10px; cursor: default; }
+  .step-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .step-dot.active { background: var(--gold); color: var(--navy-deep); border-color: var(--gold); }
+  .step-dot.done { background: var(--success); color: var(--white); border-color: var(--success); }
+  .step-dot.inactive { background: transparent; color: var(--slate-mid); border-color: var(--border-dark); }
+  .step-label { font-size: 12px; font-weight: 500; white-space: nowrap; transition: color 0.2s; }
+  .step-label.active { color: var(--text-dark); font-weight: 600; }
+  .step-label.done { color: var(--success); }
+  .step-label.inactive { color: var(--text-muted); }
+  .step-line { width: 80px; height: 1px; background: var(--border); margin: 0 16px; flex-shrink: 0; transition: background 0.2s; }
+  .step-line.done { background: var(--success); }
+
+  /* ── PAGE LAYOUTS ── */
+  .main-container {
+    width: 100%;
+    padding: 0 0 80px;
+  }
+  
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-dark);
+    letter-spacing: -0.01em;
+  }
+  .page-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold);
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.25);
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .page-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(30,42,56,0.06);
+    margin-bottom: 24px;
+  }
+  .card:last-child { margin-bottom: 0; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 28px 36px;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--cream-dark);
+  }
+
+  /* ── GRIDS ── */
+  .field-grid { display: grid; gap: 16px 20px; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-2-1-1 { grid-template-columns: 2fr 1fr 1fr; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .col-span-4 { grid-column: span 4; }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .field-label .req { color: var(--gold); margin-left: 2px; }
+  .field-hint { font-size: 11px; color: var(--slate-mid); margin-top: 2px; }
+
+  /* ── INPUT STYLES ── */
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input::placeholder, textarea::placeholder { color: var(--slate-mid); }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,162,39,0.1);
+    background: var(--white);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a95a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+  textarea { resize: vertical; min-height: 88px; line-height: 1.5; }
+  input[type="date"] { color: var(--text-dark); }
+  input.mono, select.mono, .mono { font-family: 'DM Mono', monospace !important; }
+
+  /* READ ONLY FIELD */
+  .field-readonly {
+    background: var(--cream);
+    border: 1px solid var(--cream-dark);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--text-dark);
+    font-weight: 500;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+  }
+  .field-readonly.mono {
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── ID PREVIEW BOX ── */
+  .id-preview {
+    background: var(--navy-deep);
+    border-radius: 10px;
+    padding: 24px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 24px 0 0;
+  }
+  .id-preview-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .id-preview-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .id-preview-sub { font-size: 12px; color: var(--slate-mid); margin-top: 6px; }
+  
+  .btn-generate {
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-generate:hover { background: var(--gold-light); }
+  .btn-generate svg { width: 16px; height: 16px; }
+
+  /* ── BANNER ── */
+  .banner-locked {
+    background: var(--navy-deep);
+    border-radius: 10px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    border-left: 4px solid var(--gold);
+  }
+  .banner-grid { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .banner-item {}
+  .banner-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .banner-value {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--cream);
+  }
+  .banner-value.mono { font-family: 'DM Mono', monospace; }
+  .banner-value.gold { color: var(--gold); font-weight: 600; }
+  .banner-value.gold-large { color: var(--gold); font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; }
+  .banner-divider { width: 1px; height: 32px; background: rgba(255,255,255,0.08); }
+
+  /* ── INFO STRIP ── */
+  .info-strip {
+    background: rgba(201,162,39,0.05);
+    border: 1px solid rgba(201,162,39,0.2);
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .info-strip svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+  .info-strip-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ── TABLE STYLES ── */
+  .table-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy-deep);
+    color: var(--cream);
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+  }
+  .btn-add:hover { background: var(--navy-mid); }
+  .btn-add svg { width: 14px; height: 14px; }
+
+  .line-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow-x: auto;
+    background: var(--white);
+  }
+  .line-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 1100px; }
+  .line-table thead tr { background: var(--navy-deep); }
+  .line-table thead th {
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .line-table thead th:last-child { border-right: none; }
+  .line-table thead th.right { text-align: right; }
+  .line-table tbody tr {
+    border-bottom: 1px solid var(--cream-dark);
+    background: var(--white);
+    transition: background 0.1s;
+  }
+  .line-table tbody tr:hover { background: var(--input-bg); }
+  .line-table tbody tr:last-child { border-bottom: none; }
+  .line-table tbody td {
+    padding: 6px 4px;
+    border-right: 1px solid var(--cream-dark);
+  }
+  .line-table tbody td:last-child { border-right: none; }
+  .line-table tbody td input,
+  .line-table tbody td select {
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 12.5px;
+    width: 100%;
+  }
+  .line-table tbody td input:focus,
+  .line-table tbody td select:focus {
+    border-color: var(--gold);
+    background: var(--white);
+    box-shadow: 0 0 0 2px rgba(201,162,39,0.12);
+  }
+  .line-table tbody td .mono {
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+    display: block;
+    padding: 5px 8px;
+    color: var(--text-dark);
+    font-size: 12px;
+  }
+  .line-table tbody td input[disabled],
+  .line-table tbody td select[disabled] {
+    background: #eae8e2;
+    color: var(--slate-mid);
+    cursor: not-allowed;
+  }
+  .del-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: none; border: none; border-radius: 5px;
+    cursor: pointer; color: var(--slate-mid);
+    transition: all 0.15s; margin: auto;
+  }
+  .del-btn:hover { background: #fde8e8; color: #c0392b; }
+
+  /* ── TAX SUMMARY CARD ── */
+  .tax-summary {
+    background: var(--navy-deep);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+  .tax-item { padding: 0 20px 0 0; border-right: 1px solid rgba(255,255,255,0.07); }
+  .tax-item:last-child { border-right: none; padding-right: 0; padding-left: 20px; }
+  .tax-item:first-child { padding-left: 0; }
+  .tax-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .tax-value { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--cream); }
+  .tax-value.total { color: var(--gold); font-size: 18px; font-weight: 600; }
+
+  /* ── AMOUNT IN WORDS ── */
+  .amount-words {
+    margin-top: 12px;
+    background: rgba(201,162,39,0.05);
+    border: 1px solid rgba(201,162,39,0.18);
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .amount-words-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .amount-words-text { font-size: 13px; font-style: italic; font-weight: 500; color: var(--text-dark); }
+
+  /* ── BALANCE STRIP ── */
+  .balance-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--navy-deep);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .balance-item { padding: 16px 20px; border-right: 1px solid rgba(255,255,255,0.07); }
+  .balance-item:last-child { border-right: none; }
+  .balance-label { font-size: 10px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .balance-value { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--cream); }
+  .balance-value.green { color: #4ade80; }
+  .balance-value.red { color: #f87171; }
+
+  /* ── SIDE PANEL ── */
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+  .side-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(30,42,56,0.06); }
+  .side-card-header { padding: 16px 20px; border-bottom: 1px solid var(--cream-dark); }
+  .side-card-title { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; }
+  .side-card-body { padding: 16px 20px; }
+
+  .summary-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--cream-dark); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row-label { font-size: 12px; color: var(--text-muted); }
+  .summary-row-value { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text-dark); }
+  .summary-row-value.gold { color: var(--gold); font-size: 15px; font-weight: 600; }
+  .summary-row-value.green { color: var(--success); }
+  .summary-row-value.red { color: #dc2626; }
+
+  .timeline-list { display: flex; flex-direction: column; }
+  .timeline-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+  .timeline-dot.green { background: var(--success); }
+  .timeline-dot.red { background: #dc2626; }
+  .timeline-content {}
+  .timeline-label { font-size: 12px; font-weight: 500; color: var(--text-dark); }
+  .timeline-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .badge-draft { background: rgba(201,162,39,0.12); color: #9a7a18; border: 1px solid rgba(201,162,39,0.3); }
+  .badge-submitted { background: rgba(52,65,85,0.12); color: var(--navy-deep); border: 1px solid rgba(52,65,85,0.3); }
+  .badge-approved { background: rgba(22,163,74,0.15); color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
+  .badge-posted { background: rgba(30,42,56,0.15); color: var(--navy-deep); border: 1px solid rgba(30,42,56,0.4); }
+
+  /* ── ACTIONS BAR ── */
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 20px 36px 28px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--cream-dark);
+  }
+  .actions-left { font-size: 12px; color: var(--text-muted); }
+  .actions-right { display: flex; gap: 10px; }
+  .btn {
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-ghost { background: transparent; border-color: var(--border-dark); color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--cream-dark); color: var(--text-dark); }
+  
+  .btn-secondary { background: transparent; border-color: var(--navy); color: var(--navy); }
+  .btn-secondary:hover { background: var(--navy-deep); color: var(--cream); }
+  
+  .btn-primary { background: var(--gold); border-color: var(--gold); color: var(--navy-deep); font-weight: 600; }
+  .btn-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+  /* SUCCESS BANNER */
+  .success-banner {
+    background: var(--success-bg);
+    border: 1px solid var(--success-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .success-banner svg { width: 24px; height: 24px; color: var(--success); flex-shrink: 0; }
+  .success-title { font-size: 16px; font-weight: 600; color: #14532d; margin-bottom: 4px; }
+  .success-desc { font-size: 13.5px; color: #166534; line-height: 1.5; }
+
+  /* SCREEN LAYOUTS */
+  #screen-1-main { max-width: 860px; margin: 40px auto; padding: 0 32px; }
+  #screen-2-main { max-width: 1280px; margin: 32px auto; padding: 0 32px; }
+  #screen-3-main { max-width: 1280px; margin: 32px auto; padding: 0 32px; }
+  #screen-4-main { max-width: 1280px; margin: 32px auto; padding: 0 32px; }
+
+  .two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* INPUT HIGHLIGHT */
+  input:invalid, select:invalid, textarea:invalid {
+    box-shadow: none;
+  }
+  .error-input {
+    border-color: #dc2626 !important;
+    background-color: #fff5f5 !important;
+  }
+  .error-text {
+    font-size: 11px;
+    color: #dc2626;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAVBAR -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo" style="background: var(--white); overflow: hidden;">
+      <img src="logo.jpg" alt="Digiketing Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;" />
+    </div>
+    <div>
+      <div class="nav-title">digiketing software consulting ltd</div>
+      <div class="nav-subtitle">Enterprise Resource Planning</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-module">Accounts Payable Module</div>
+    <div class="nav-avatar">AP</div>
+  </div>
+</nav>
+
+<!-- BREADCRUMBS -->
+<div class="breadcrumb" id="breadcrumb-container">
+  <a href="#">Dashboard</a>
+  <span>›</span>
+  <a href="#">Accounts Payable</a>
+  <span>›</span>
+  <span style="color: var(--text-dark); font-weight: 500;">Create Invoice ID</span>
+</div>
+
+<!-- STEPPER BAR -->
+<div class="stepper-bar">
+  <div class="stepper" id="stepper-nav">
+    <div class="step" id="step-nav-1">
+      <div class="step-dot active" id="dot-1">1</div>
+      <span class="step-label active" id="label-1">Create ID</span>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step" id="step-nav-2">
+      <div class="step-dot inactive" id="dot-2">2</div>
+      <span class="step-label inactive" id="label-2">Invoice Entry</span>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-nav-3">
+      <div class="step-dot inactive" id="dot-3">3</div>
+      <span class="step-label inactive" id="label-3">Approval Review</span>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step" id="step-nav-4">
+      <div class="step-dot inactive" id="dot-4">4</div>
+      <span class="step-label inactive" id="label-4">Payment Entry</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN SCREENS CONTAINER -->
+<div class="main-container">
+
+  <!-- ==================== SCREEN 1: CREATE INVOICE ID ==================== -->
+  <div id="screen-1" class="screen active">
+    <div id="screen-1-main">
+      <div class="page-header">
+        <div class="page-title">Create Invoice ID</div>
+        <div class="page-tag">Step 1 of 4</div>
+      </div>
+      <p class="page-desc">Fill in the classification and vendor reference details below to generate a unique, sequenced Invoice ID. This ID serves as the master tracking key throughout the invoice lifecycle.</p>
+
+      <form id="form-screen-1" onsubmit="event.preventDefault();">
+        <div class="card">
+          <!-- Invoice Classification -->
+          <div class="section">
+            <div class="section-title">Invoice Classification</div>
+            <div class="field-grid grid-3">
+              <div class="field">
+                <label class="field-label">Financial Year <span class="req">*</span></label>
+                <select id="financial-year" required>
+                  <option value="2024-25">2024-25</option>
+                  <option value="2025-26" selected>2025-26</option>
+                  <option value="2026-27">2026-27</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Invoice Type <span class="req">*</span></label>
+                <select id="invoice-type" required>
+                  <option value="" disabled selected>Select type</option>
+                  <option value="Tax Invoice">Tax Invoice</option>
+                  <option value="Proforma Invoice">Proforma Invoice</option>
+                  <option value="Credit Note">Credit Note</option>
+                  <option value="Debit Note">Debit Note</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Department <span class="req">*</span></label>
+                <select id="department" required>
+                  <option value="" disabled selected>Select department</option>
+                  <option value="Procurement">Procurement</option>
+                  <option value="Operations">Operations</option>
+                  <option value="IT">IT</option>
+                  <option value="Finance">Finance</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Cost Center</label>
+                <select id="cost-center">
+                  <option value="" disabled selected>Select cost center</option>
+                  <option value="CC-001 — Head Office">CC-001 — Head Office</option>
+                  <option value="CC-002 — Branch Operations">CC-002 — Branch Operations</option>
+                  <option value="CC-003 — IT Infrastructure">CC-003 — IT Infrastructure</option>
+                  <option value="CC-004 — Marketing">CC-004 — Marketing</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Business Unit</label>
+                <select id="business-unit">
+                  <option value="" disabled selected>Select unit</option>
+                  <option value="BU-01 — Retail">BU-01 — Retail</option>
+                  <option value="BU-02 — Wholesale">BU-02 — Wholesale</option>
+                  <option value="BU-03 — Export">BU-03 — Export</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Priority</label>
+                <select id="priority">
+                  <option value="Normal" selected>Normal</option>
+                  <option value="High">High</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vendor & Reference Info -->
+          <div class="section">
+            <div class="section-title">Vendor & Reference</div>
+            <div class="field-grid grid-3">
+              <div class="field">
+                <label class="field-label">Vendor Name <span class="req">*</span></label>
+                <input type="text" id="vendor-name-s1" placeholder="Company / Supplier name" required />
+              </div>
+              <div class="field">
+                <label class="field-label">Vendor Code</label>
+                <input type="text" id="vendor-code-s1" placeholder="e.g. VND-0042" />
+                <span class="field-hint">Auto-assigned if left blank</span>
+              </div>
+              <div class="field">
+                <label class="field-label">PO Reference</label>
+                <input type="text" id="po-reference-s1" placeholder="Purchase Order #" />
+              </div>
+              <div class="field">
+                <label class="field-label">Vendor Invoice No. <span class="req">*</span></label>
+                <input type="text" id="vendor-invoice-no-s1" placeholder="As printed on invoice" required />
+              </div>
+              <div class="field">
+                <label class="field-label">Vendor Invoice Date <span class="req">*</span></label>
+                <input type="date" id="vendor-invoice-date-s1" required />
+              </div>
+              <div class="field">
+                <label class="field-label">Approximate Amount (₹)</label>
+                <input type="number" id="approx-amount" class="mono" placeholder="0.00" min="0" step="0.01" />
+              </div>
+            </div>
+          </div>
+
+          <!-- ID Config & Preview -->
+          <div class="section">
+            <div class="section-title">ID Configuration</div>
+            <div class="field-grid grid-3">
+              <div class="field">
+                <label class="field-label">ID Prefix <span class="req">*</span></label>
+                <input type="text" id="id-prefix" value="INV" placeholder="e.g. INV" style="text-transform: uppercase;" required />
+                <span class="field-hint">2–5 uppercase letters</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Series / Sequence</label>
+                <select id="sequence-type">
+                  <option value="Auto (system assigned)" selected>Auto (system assigned)</option>
+                  <option value="Manual entry">Manual entry</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Manual Sequence No.</label>
+                <input type="number" id="manual-sequence-no" placeholder="e.g. 001" min="1" disabled style="background: var(--cream);" />
+                <span class="field-hint">Only if manual series selected</span>
+              </div>
+            </div>
+
+            <!-- Generated Preview -->
+            <div class="id-preview">
+              <div class="id-preview-left">
+                <div class="id-preview-label">Generated Invoice ID</div>
+                <div class="id-preview-value" id="generated-id-preview">INV-2025-00142</div>
+                <div class="id-preview-sub">Format: PREFIX — FINANCIAL YEAR — SEQUENCE</div>
+              </div>
+              <button type="button" class="btn-generate" id="btn-generate-id">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M10 2h4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 2L9 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Generate ID
+              </button>
+            </div>
+
+            <div class="info-strip">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M8 7v4M8 5.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              <span class="info-strip-text">This Invoice ID will be permanently assigned and cannot be changed after confirmation. It will link this invoice transaction from entry to approval to GL posting.</span>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="section">
+            <div class="section-title">Internal Notes</div>
+            <div class="field">
+              <textarea id="internal-notes" placeholder="Any internal notes or context for this invoice (optional)..." style="min-height: 80px;"></textarea>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <div class="actions-left">Step 1 of 4 — Invoice ID Creation</div>
+            <div class="actions-right">
+              <button type="button" class="btn btn-ghost" onclick="resetForm()">Cancel</button>
+              <button type="button" class="btn btn-secondary" onclick="saveDraft(1)">Save Draft</button>
+              <button type="button" class="btn btn-primary" id="btn-confirm-s1">Confirm & Proceed to Invoice Entry →</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 2: INVOICE ENTRY ==================== -->
+  <div id="screen-2" class="screen">
+    <div id="screen-2-main">
+      <div class="page-header">
+        <div class="page-title">Invoice Entry</div>
+        <div class="page-tag">Step 2 of 4</div>
+      </div>
+
+      <!-- Locked Banner -->
+      <div class="banner-locked">
+        <div class="banner-grid">
+          <div class="banner-item">
+            <div class="banner-label">Invoice ID</div>
+            <div class="banner-value gold-large" id="banner-invoice-id">INV-2025-00142</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Vendor Name</div>
+            <div class="banner-value" id="banner-vendor-name" style="font-weight: 600; color: var(--white);">Locked Supplier Name</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Status</div>
+            <div class="badge badge-draft" id="banner-status">Draft</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--slate-mid);">Entry Status: In Progress</div>
+      </div>
+
+      <form id="form-screen-2" onsubmit="event.preventDefault();">
+        <div class="card">
+          <!-- Invoice details -->
+          <div class="section">
+            <div class="section-title">Invoice Details</div>
+            <div class="field-grid grid-4">
+              <div class="field">
+                <label class="field-label">Invoice Number <span class="req">*</span></label>
+                <input type="text" id="invoice-number" required />
+              </div>
+              <div class="field">
+                <label class="field-label">Invoice Date <span class="req">*</span></label>
+                <input type="date" id="invoice-date" required />
+              </div>
+              <div class="field">
+                <label class="field-label">Due Date</label>
+                <input type="date" id="due-date" readonly style="background: var(--cream); cursor: not-allowed;" />
+                <span class="field-hint">Auto-calculated from terms</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Invoice Type <span class="req">*</span></label>
+                <select id="invoice-type-s2" required>
+                  <option value="Tax Invoice">Tax Invoice</option>
+                  <option value="Proforma Invoice">Proforma Invoice</option>
+                  <option value="Credit Note">Credit Note</option>
+                  <option value="Debit Note">Debit Note</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Payment Terms <span class="req">*</span></label>
+                <select id="payment-terms" required>
+                  <option value="" disabled selected>Select terms</option>
+                  <option value="Net 15">Net 15</option>
+                  <option value="Net 30">Net 30</option>
+                  <option value="Net 45">Net 45</option>
+                  <option value="Net 60">Net 60</option>
+                  <option value="Due on Receipt">Due on Receipt</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">PO Number</label>
+                <input type="text" id="po-number" placeholder="Purchase Order #" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Vendor Details -->
+          <div class="section">
+            <div class="section-title">Vendor Details</div>
+            <div class="field-grid grid-2-1-1" style="margin-bottom: 16px;">
+              <div class="field">
+                <label class="field-label">Vendor Name <span class="req">*</span></label>
+                <input type="text" id="vendor-name-s2" placeholder="Company / Supplier name" required />
+              </div>
+              <div class="field">
+                <label class="field-label">GSTIN <span class="req">*</span></label>
+                <div style="position:relative; display:flex; align-items:center;">
+                  <input type="text" id="vendor-gstin" class="mono" placeholder="27AAAAA1111A1Z5" style="padding-right: 32px; text-transform: uppercase;" required />
+                  <span id="gstin-status" style="position:absolute; right:10px; font-size:14px; top: 50%; transform: translateY(-50%);"></span>
+                </div>
+                <span id="gstin-error" class="error-text" style="display:none;">Invalid GSTIN format.</span>
+              </div>
+              <div class="field">
+                <label class="field-label">PAN</label>
+                <input type="text" id="vendor-pan" class="mono" readonly style="background: var(--cream);" placeholder="PAN extracted" />
+              </div>
+            </div>
+            <div class="field-grid" style="grid-template-columns: 3fr 1fr;">
+              <div class="field">
+                <label class="field-label">Address</label>
+                <textarea id="vendor-address" placeholder="Full address..."></textarea>
+              </div>
+              <div class="field">
+                <label class="field-label">State <span class="req">*</span></label>
+                <select id="vendor-state" required>
+                  <option value="" disabled selected>Select state</option>
+                  <option value="Andaman and Nicobar Islands">Andaman & Nicobar Islands</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                  <option value="Assam">Assam</option>
+                  <option value="Bihar">Bihar</option>
+                  <option value="Chandigarh">Chandigarh</option>
+                  <option value="Chhattisgarh">Chhattisgarh</option>
+                  <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra & Nagar Haveli and Daman & Diu</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Goa">Goa</option>
+                  <option value="Gujarat">Gujarat</option>
+                  <option value="Haryana">Haryana</option>
+                  <option value="Himachal Pradesh">Himachal Pradesh</option>
+                  <option value="Jammu and Kashmir">Jammu & Kashmir</option>
+                  <option value="Jharkhand">Jharkhand</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Ladakh">Ladakh</option>
+                  <option value="Lakshadweep">Lakshadweep</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Manipur">Manipur</option>
+                  <option value="Meghalaya">Meghalaya</option>
+                  <option value="Mizoram">Mizoram</option>
+                  <option value="Nagaland">Nagaland</option>
+                  <option value="Odisha">Odisha</option>
+                  <option value="Puducherry">Puducherry</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Sikkim">Sikkim</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Tripura">Tripura</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="Uttarakhand">Uttarakhand</option>
+                  <option value="West Bengal">West Bengal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Line Items Table -->
+          <div class="section">
+            <div class="table-header-row">
+              <div class="section-title" style="margin-bottom:0; flex:1;">Line Items</div>
+              <button type="button" class="btn-add" id="btn-add-item">
+                <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Add Item
+              </button>
+            </div>
+            
+            <div class="line-table-wrap">
+              <table class="line-table">
+                <thead>
+                  <tr>
+                    <th style="width:18%">Description <span class="req">*</span></th>
+                    <th style="width:8%">HSN Code <span class="req">*</span></th>
+                    <th style="width:7%">UOM</th>
+                    <th class="right" style="width:6%">Qty <span class="req">*</span></th>
+                    <th class="right" style="width:9%">Rate (₹) <span class="req">*</span></th>
+                    <th class="right" style="width:9%">Taxable Value</th>
+                    <th class="right" style="width:6%">CGST %</th>
+                    <th class="right" style="width:7%">CGST Amt</th>
+                    <th class="right" style="width:6%">SGST %</th>
+                    <th class="right" style="width:7%">SGST Amt</th>
+                    <th class="right" style="width:6%">IGST %</th>
+                    <th class="right" style="width:7%">IGST Amt</th>
+                    <th class="right" style="width:9%">Total</th>
+                    <th style="width:3%"></th>
+                  </tr>
+                </thead>
+                <tbody id="line-items-tbody">
+                  <!-- Row added dynamically by Javascript -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tax Summary -->
+            <div class="tax-summary">
+              <div class="tax-item">
+                <div class="tax-label">Taxable Value</div>
+                <div class="tax-value" id="summary-taxable">₹0.00</div>
+              </div>
+              <div class="tax-item">
+                <div class="tax-label">CGST Amount</div>
+                <div class="tax-value" id="summary-cgst">₹0.00</div>
+              </div>
+              <div class="tax-item">
+                <div class="tax-label">SGST Amount</div>
+                <div class="tax-value" id="summary-sgst">₹0.00</div>
+              </div>
+              <div class="tax-item">
+                <div class="tax-label">IGST Amount</div>
+                <div class="tax-value" id="summary-igst">₹0.00</div>
+              </div>
+              <div class="tax-item">
+                <div class="tax-label">Grand Total</div>
+                <div class="tax-value total" id="summary-total">₹0.00</div>
+              </div>
+            </div>
+
+            <!-- Amount in words -->
+            <div class="amount-words">
+              <span class="amount-words-label">Amount in Words</span>
+              <span class="amount-words-text" id="summary-words">Zero Rupees Only</span>
+            </div>
+          </div>
+
+          <!-- Vendor Bank Details -->
+          <div class="section">
+            <div class="section-title">Vendor Bank Details</div>
+            <div class="field-grid grid-2" style="margin-bottom:16px;">
+              <div class="field">
+                <label class="field-label">Bank Name</label>
+                <input type="text" id="bank-name" placeholder="e.g. State Bank of India" />
+              </div>
+              <div class="field">
+                <label class="field-label">Account Number</label>
+                <input type="text" id="bank-account" placeholder="Bank account number" />
+              </div>
+              <div class="field">
+                <label class="field-label">IFSC Code</label>
+                <input type="text" id="bank-ifsc" class="mono" placeholder="e.g. SBIN0001234" />
+              </div>
+              <div class="field">
+                <label class="field-label">Branch Name</label>
+                <input type="text" id="bank-branch" placeholder="Branch name" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div class="section">
+            <div class="section-title">Terms and Conditions</div>
+            <div class="field">
+              <textarea id="terms-conditions" placeholder="Enter contract terms and conditions here..." style="min-height:80px;"></textarea>
+            </div>
+          </div>
+
+          <!-- Authorized Signatory -->
+          <div class="section">
+            <div class="section-title">Authorized Signatory</div>
+            <div class="field-grid grid-2">
+              <div class="field">
+                <label class="field-label">Name</label>
+                <input type="text" id="signatory-name" placeholder="Full name" />
+              </div>
+              <div class="field">
+                <label class="field-label">Designation</label>
+                <input type="text" id="signatory-designation" placeholder="e.g. Director / Finance Head" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions">
+            <div class="actions-left">Step 2 of 4 — Invoice Detail Entry</div>
+            <div class="actions-right">
+              <button type="button" class="btn btn-ghost" onclick="handleStepClick(1)">← Go Back</button>
+              <button type="button" class="btn btn-secondary" onclick="saveDraft(2)">Save Draft</button>
+              <button type="button" class="btn btn-primary" id="btn-submit-s2">Submit for Approval →</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 3: APPROVAL REVIEW ==================== -->
+  <div id="screen-3" class="screen">
+    <div id="screen-3-main">
+      <div class="page-header">
+        <div class="page-title">Approval Review</div>
+        <div class="page-tag">Step 3 of 4</div>
+      </div>
+
+      <!-- Locked Banner -->
+      <div class="banner-locked">
+        <div class="banner-grid">
+          <div class="banner-item">
+            <div class="banner-label">Invoice ID</div>
+            <div class="banner-value gold-large" id="review-banner-invoice-id">INV-2025-00142</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Vendor Name</div>
+            <div class="banner-value" id="review-banner-vendor" style="font-weight: 600; color: var(--white);">-</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Invoice Grand Total</div>
+            <div class="banner-value gold" id="review-banner-total" style="font-weight: 600;">₹0.00</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Status</div>
+            <div class="badge badge-submitted">Submitted</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--slate-mid);">Review Level: AP Manager</div>
+      </div>
+
+      <div class="card">
+        <!-- Read-Only Classification -->
+        <div class="section">
+          <div class="section-title">Invoice Classification (Read-Only)</div>
+          <div class="field-grid grid-3">
+            <div class="field">
+              <span class="field-label">Financial Year</span>
+              <div class="field-readonly" id="read-fy">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Invoice Type</span>
+              <div class="field-readonly" id="read-type">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Department</span>
+              <div class="field-readonly" id="read-dept">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Cost Center</span>
+              <div class="field-readonly" id="read-cc">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Business Unit</span>
+              <div class="field-readonly" id="read-bu">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Priority</span>
+              <div class="field-readonly" id="read-priority">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Read-Only Header details -->
+        <div class="section">
+          <div class="section-title">Invoice Details (Read-Only)</div>
+          <div class="field-grid grid-4">
+            <div class="field">
+              <span class="field-label">Invoice Number</span>
+              <div class="field-readonly" id="read-invoice-no">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Invoice Date</span>
+              <div class="field-readonly" id="read-invoice-date">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Due Date</span>
+              <div class="field-readonly" id="read-due-date">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Payment Terms</span>
+              <div class="field-readonly" id="read-terms">-</div>
+            </div>
+            <div class="field col-span-2">
+              <span class="field-label">PO Number / Ref</span>
+              <div class="field-readonly" id="read-po-no">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Read-Only Vendor details -->
+        <div class="section">
+          <div class="section-title">Vendor Details (Read-Only)</div>
+          <div class="field-grid grid-3" style="margin-bottom:16px;">
+            <div class="field">
+              <span class="field-label">Vendor Name</span>
+              <div class="field-readonly" id="read-vendor-name">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">GSTIN</span>
+              <div class="field-readonly mono" id="read-vendor-gstin">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">PAN</span>
+              <div class="field-readonly mono" id="read-vendor-pan">-</div>
+            </div>
+          </div>
+          <div class="field-grid grid-2">
+            <div class="field">
+              <span class="field-label">Address</span>
+              <div class="field-readonly" id="read-vendor-address" style="min-height:38px; align-items: flex-start;">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">State</span>
+              <div class="field-readonly" id="read-vendor-state">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Read-Only Line Items Table -->
+        <div class="section">
+          <div class="section-title">Line Items</div>
+          <div class="line-table-wrap" style="margin-bottom:16px;">
+            <table class="line-table">
+              <thead>
+                <tr>
+                  <th style="width:20%">Description</th>
+                  <th style="width:10%">HSN Code</th>
+                  <th style="width:7%">UOM</th>
+                  <th class="right" style="width:6%">Qty</th>
+                  <th class="right" style="width:10%">Rate (₹)</th>
+                  <th class="right" style="width:10%">Taxable Value</th>
+                  <th class="right" style="width:6%">CGST %</th>
+                  <th class="right" style="width:7%">CGST Amt</th>
+                  <th class="right" style="width:6%">SGST %</th>
+                  <th class="right" style="width:7%">SGST Amt</th>
+                  <th class="right" style="width:6%">IGST %</th>
+                  <th class="right" style="width:7%">IGST Amt</th>
+                  <th class="right" style="width:10%">Total</th>
+                </tr>
+              </thead>
+              <tbody id="read-line-items-tbody">
+                <!-- Rows added dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tax breakdown summary -->
+          <div class="tax-summary">
+            <div class="tax-item">
+              <div class="tax-label">Taxable Value</div>
+              <div class="tax-value" id="read-summary-taxable">₹0.00</div>
+            </div>
+            <div class="tax-item">
+              <div class="tax-label">CGST Amount</div>
+              <div class="tax-value" id="read-summary-cgst">₹0.00</div>
+            </div>
+            <div class="tax-item">
+              <div class="tax-label">SGST Amount</div>
+              <div class="tax-value" id="read-summary-sgst">₹0.00</div>
+            </div>
+            <div class="tax-item">
+              <div class="tax-label">IGST Amount</div>
+              <div class="tax-value" id="read-summary-igst">₹0.00</div>
+            </div>
+            <div class="tax-item">
+              <div class="tax-label">Grand Total</div>
+              <div class="tax-value total" id="read-summary-total">₹0.00</div>
+            </div>
+          </div>
+
+          <!-- Amount in Words -->
+          <div class="amount-words">
+            <span class="amount-words-label">Amount in Words</span>
+            <span class="amount-words-text" id="read-summary-words">-</span>
+          </div>
+        </div>
+
+        <!-- Read-Only Bank details -->
+        <div class="section">
+          <div class="section-title">Vendor Bank Details (Read-Only)</div>
+          <div class="field-grid grid-4">
+            <div class="field">
+              <span class="field-label">Bank Name</span>
+              <div class="field-readonly" id="read-bank-name">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Account Number</span>
+              <div class="field-readonly mono" id="read-bank-account">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">IFSC Code</span>
+              <div class="field-readonly mono" id="read-bank-ifsc">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Branch Name</span>
+              <div class="field-readonly" id="read-bank-branch">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms and signatory -->
+        <div class="section">
+          <div class="field-grid grid-2">
+            <div class="field">
+              <span class="field-label">Terms and Conditions</span>
+              <div class="field-readonly" id="read-tc" style="min-height:38px; align-items:flex-start;">-</div>
+            </div>
+            <div class="field">
+              <span class="field-label">Authorized Signatory</span>
+              <div class="field-readonly" id="read-signatory-name">-</div>
+              <div class="field-readonly" id="read-signatory-desig" style="margin-top: 6px;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Approval Fields -->
+        <div class="section" style="background: rgba(201,162,39,0.03); border-top: 1.5px solid rgba(201,162,39,0.2);">
+          <div class="section-title">Approver Review Actions</div>
+          <div class="field-grid grid-3" style="margin-bottom:16px;">
+            <div class="field">
+              <label class="field-label">Approver Name <span class="req">*</span></label>
+              <input type="text" id="approver-name" placeholder="Full name of reviewer" required />
+            </div>
+            <div class="field">
+              <label class="field-label">Review Date <span class="req">*</span></label>
+              <input type="date" id="approver-date" required />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Remarks / Review Notes</label>
+            <textarea id="approver-remarks" placeholder="Enter approval or rejection remarks..." style="min-height:60px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <div class="actions-left">Step 3 of 4 — Approval & Management Review</div>
+          <div class="actions-right">
+            <button type="button" class="btn btn-secondary" id="btn-reject-invoice" style="border-color: #dc2626; color: #dc2626;">Reject & Send Back ❌</button>
+            <button type="button" class="btn btn-primary" id="btn-approve-invoice">Approve Invoice & Proceed ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCREEN 4: PAYMENT ENTRY ==================== -->
+  <div id="screen-4" class="screen">
+    <div id="screen-4-main">
+      <div class="page-header">
+        <div class="page-title">Payment Entry & GL Posting</div>
+        <div class="page-tag">Step 4 of 4</div>
+      </div>
+
+      <!-- Posted Success Banner (Hidden by Default) -->
+      <div class="success-banner" id="posted-success-banner" style="display:none;">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <circle cx="10" cy="10" r="8" fill="#dcfce7" />
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" fill="#16a34a"/>
+        </svg>
+        <div>
+          <div class="success-title">Payment Successfully Posted to GL</div>
+          <div class="success-desc">
+            This invoice is now fully paid and ledger balances have been updated. 
+            <strong>Debit Account:</strong> <span id="success-debit"></span> | 
+            <strong>Credit Account:</strong> <span id="success-credit"></span> | 
+            <strong>Posting Period:</strong> <span id="success-period"></span>. 
+            The document is now locked for editing.
+          </div>
+        </div>
+      </div>
+
+      <!-- Locked Banner -->
+      <div class="banner-locked">
+        <div class="banner-grid">
+          <div class="banner-item">
+            <div class="banner-label">Invoice ID</div>
+            <div class="banner-value gold-large" id="payment-banner-invoice-id">INV-2025-00142</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Vendor Name</div>
+            <div class="banner-value" id="payment-banner-vendor">-</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Invoice Date</div>
+            <div class="banner-value" id="payment-banner-date">-</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Due Date</div>
+            <div class="banner-value" id="payment-banner-due" style="color:#f87171;">-</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Invoice Total</div>
+            <div class="banner-value gold" id="payment-banner-total">₹0.00</div>
+          </div>
+          <div class="banner-divider"></div>
+          <div class="banner-item">
+            <div class="banner-label">Status</div>
+            <div class="badge badge-approved" id="payment-banner-status">Approved</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <!-- LEFT COLUMN: PAYMENT FORM -->
+        <form id="form-screen-4" onsubmit="event.preventDefault();">
+          <div class="card">
+            <!-- Payment Details -->
+            <div class="section">
+              <div class="section-title">Payment Details</div>
+              <div class="field-grid grid-3">
+                <div class="field">
+                  <label class="field-label">Payment Reference No. <span class="req">*</span></label>
+                  <input type="text" id="payment-ref-no" class="mono" placeholder="PAY-2025-00089" required />
+                </div>
+                <div class="field">
+                  <label class="field-label">Payment Date <span class="req">*</span></label>
+                  <input type="date" id="payment-date" required />
+                </div>
+                <div class="field">
+                  <label class="field-label">Payment Mode <span class="req">*</span></label>
+                  <select id="payment-mode" required>
+                    <option value="" disabled selected>Select mode</option>
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">Payment Amount (₹) <span class="req">*</span></label>
+                  <input type="number" id="payment-amount" class="mono" placeholder="0.00" min="0.01" step="0.01" required />
+                </div>
+                <div class="field">
+                  <label class="field-label">Currency</label>
+                  <select id="payment-currency">
+                    <option value="INR">INR — Indian Rupee</option>
+                    <option value="USD">USD — US Dollar</option>
+                    <option value="EUR">EUR — Euro</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">Exchange Rate</label>
+                  <input type="number" id="exchange-rate" class="mono" value="1.00" step="0.0001" readonly style="background: var(--cream);" />
+                  <span class="field-hint" id="exchange-hint">Locked for INR payments</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bank Transfer Details -->
+            <div class="section">
+              <div class="section-title">Bank Transfer Details</div>
+              <div class="field-grid grid-3">
+                <div class="field">
+                  <label class="field-label">Transaction / UTR No. <span id="utr-req-star" style="display:none;" class="req">*</span></label>
+                  <input type="text" id="transaction-utr" class="mono" placeholder="12-digit UTR number" />
+                  <span class="field-hint">Required for Transfers</span>
+                </div>
+                <div class="field">
+                  <label class="field-label">Paying Bank</label>
+                  <input type="text" id="paying-bank" placeholder="e.g. HDFC Bank" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Paying Account No.</label>
+                  <input type="text" id="paying-account" class="mono" placeholder="Paying bank account no" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Cheque No. <span id="chq-req-star" style="display:none;" class="req">*</span></label>
+                  <input type="text" id="cheque-no" class="mono" placeholder="6-digit cheque number" disabled style="background: var(--cream);" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Cheque Date</label>
+                  <input type="date" id="cheque-date" disabled style="background: var(--cream);" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Cheque Bank</label>
+                  <input type="text" id="cheque-bank" placeholder="Cheque issuing bank" disabled style="background: var(--cream);" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Vendor Bank Details (Read-only) -->
+            <div class="section">
+              <div class="section-title">Vendor Bank Details (Auto-Filled)</div>
+              <div class="field-grid grid-4">
+                <div class="field">
+                  <span class="field-label">Bank Name</span>
+                  <div class="field-readonly" id="pay-vendor-bank">-</div>
+                </div>
+                <div class="field">
+                  <span class="field-label">Account Number</span>
+                  <div class="field-readonly mono" id="pay-vendor-account">-</div>
+                </div>
+                <div class="field">
+                  <span class="field-label">IFSC Code</span>
+                  <div class="field-readonly mono" id="pay-vendor-ifsc">-</div>
+                </div>
+                <div class="field">
+                  <span class="field-label">Branch</span>
+                  <div class="field-readonly" id="pay-vendor-branch">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Deductions & Adjustments -->
+            <div class="section">
+              <div class="section-title">Deductions & Adjustments</div>
+              <div class="field-grid grid-3" style="margin-bottom:16px;">
+                <div class="field">
+                  <label class="field-label">TDS Amount (₹)</label>
+                  <input type="number" id="tds-amount" class="mono" placeholder="0.00" min="0" step="0.01" value="0.00" />
+                </div>
+                <div class="field">
+                  <label class="field-label">TDS Section</label>
+                  <select id="tds-section">
+                    <option value="NA" selected>Not Applicable</option>
+                    <option value="194C">Section 194C — Contractor</option>
+                    <option value="194J">Section 194J — Professional</option>
+                    <option value="194H">Section 194H — Commission</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">Discount / Advance Adjusted (₹)</label>
+                  <input type="number" id="discount-advance" class="mono" placeholder="0.00" min="0" step="0.01" value="0.00" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Other Deductions (₹)</label>
+                  <input type="number" id="other-deductions" class="mono" placeholder="0.00" min="0" step="0.01" value="0.00" />
+                </div>
+                <div class="field col-span-2">
+                  <label class="field-label">Deduction Reason</label>
+                  <input type="text" id="deduction-reason" placeholder="Reason for deductions if any" />
+                </div>
+              </div>
+
+              <!-- Balance Strip -->
+              <div class="balance-strip">
+                <div class="balance-item">
+                  <div class="balance-label">Invoice Total</div>
+                  <div class="balance-value" id="balance-invoice-total">₹0.00</div>
+                </div>
+                <div class="balance-item">
+                  <div class="balance-label">Total Deductions</div>
+                  <div class="balance-value red" id="balance-total-deductions">− ₹0.00</div>
+                </div>
+                <div class="balance-item">
+                  <div class="balance-label">Net Payable</div>
+                  <div class="balance-value green" id="balance-net-payable">₹0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- GL Posting Details -->
+            <div class="section">
+              <div class="section-title">GL Posting Details</div>
+              <div class="field-grid grid-3">
+                <div class="field">
+                  <label class="field-label">Debit Account (GL) <span class="req">*</span></label>
+                  <select id="gl-debit-account" required>
+                    <option value="" disabled selected>Select account</option>
+                    <option value="2000 — Trade Payables">2000 — Trade Payables</option>
+                    <option value="2100 — Sundry Creditors">2100 — Sundry Creditors</option>
+                    <option value="2200 — Advance to Vendors">2200 — Advance to Vendors</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">Credit Account (GL) <span class="req">*</span></label>
+                  <select id="gl-credit-account" required>
+                    <option value="" disabled selected>Select account</option>
+                    <option value="1000 — Cash & Bank">1000 — Cash & Bank</option>
+                    <option value="1100 — HDFC Current Account">1100 — HDFC Current Account</option>
+                    <option value="1200 — ICICI Current Account">1200 — ICICI Current Account</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label">Cost Center</label>
+                  <select id="gl-cost-center">
+                    <option value="" disabled selected>Select cost center</option>
+                    <option value="CC-001 — Head Office">CC-001 — Head Office</option>
+                    <option value="CC-002 — Branch Operations">CC-002 — Branch Operations</option>
+                    <option value="CC-003 — IT Infrastructure">CC-003 — IT Infrastructure</option>
+                  </select>
+                </div>
+                <div class="field col-span-2">
+                  <label class="field-label">Narration</label>
+                  <input type="text" id="gl-narration" placeholder="Enter GL posting description" />
+                </div>
+                <div class="field">
+                  <label class="field-label">Posting Period</label>
+                  <select id="gl-posting-period">
+                    <option value="June 2026">June 2026</option>
+                    <option value="July 2026">July 2026</option>
+                    <option value="August 2026">August 2026</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Remarks & Uploads -->
+            <div class="section">
+              <div class="section-title">Remarks & Attachments</div>
+              <div class="field" style="margin-bottom:16px;">
+                <label class="field-label">Payment Remarks</label>
+                <textarea id="payment-remarks" placeholder="Any notes regarding this payment entry..."></textarea>
+              </div>
+              <div style="border: 2px dashed var(--border-dark); border-radius: 8px; padding: 24px; text-align:center; color:var(--text-muted);">
+                <div style="font-size:13px; font-weight:500; margin-bottom:4px;">Drag & drop payment proof here</div>
+                <div style="font-size:12px;">Bank receipt, UTR screenshot, cheque scan (PDF, JPG, PNG)</div>
+                <button type="button" style="margin-top:12px; background:transparent; border:1px solid var(--border-dark); border-radius:6px; padding:7px 16px; font-size:12.5px; cursor:pointer; color:var(--text-mid); font-family:'DM Sans',sans-serif;">Browse Files</button>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+              <div class="actions-left">Step 4 of 4 — Payment Entry & GL Ledger Posting</div>
+              <div class="actions-right" id="pay-actions-right">
+                <button type="button" class="btn btn-ghost" onclick="handleStepClick(3)">← Go Back</button>
+                <button type="button" class="btn btn-secondary" onclick="saveDraft(4)">Save Draft</button>
+                <button type="button" class="btn btn-primary" id="btn-post-gl">Post Payment to GL ✓</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- RIGHT SIDE PANEL -->
+        <div class="side-panel">
+          <!-- Invoice Summary -->
+          <div class="side-card">
+            <div class="side-card-header">
+              <div class="side-card-title">Invoice Summary</div>
+            </div>
+            <div class="side-card-body">
+              <div class="summary-row">
+                <span class="summary-row-label">Taxable Value</span>
+                <span class="summary-row-value" id="side-taxable">₹0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">CGST Amount</span>
+                <span class="summary-row-value" id="side-cgst">₹0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">SGST Amount</span>
+                <span class="summary-row-value" id="side-sgst">₹0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">IGST Amount</span>
+                <span class="summary-row-value" id="side-igst">₹0.00</span>
+              </div>
+              <div class="summary-row" style="border-top:2px solid var(--cream-dark); margin-top:4px; padding-top:12px;">
+                <span class="summary-row-label" style="font-weight:600; color:var(--text-dark);">Invoice Total</span>
+                <span class="summary-row-value gold" id="side-invoice-total">₹0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Paid Till Date</span>
+                <span class="summary-row-value green" id="side-paid">₹0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label" style="font-weight:600; color:var(--text-dark);">Balance Due</span>
+                <span class="summary-row-value red" style="font-size:15px; font-weight: 600;" id="side-balance-due">₹0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Timeline -->
+          <div class="side-card">
+            <div class="side-card-header">
+              <div class="side-card-title">Invoice Timeline</div>
+            </div>
+            <div class="side-card-body">
+              <div class="timeline-list" id="timeline-list">
+                <!-- Timelines rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Vendor Info -->
+          <div class="side-card">
+            <div class="side-card-header">
+              <div class="side-card-title">Vendor Info</div>
+            </div>
+            <div class="side-card-body" style="font-size:12.5px;">
+              <div style="font-weight:600; color:var(--text-dark); margin-bottom:4px;" id="side-vendor-name">-</div>
+              <div style="color:var(--text-muted); margin-bottom:8px;" class="mono" id="side-vendor-gstin">-</div>
+              <div style="color:var(--text-muted); margin-bottom:12px;" id="side-vendor-address">-</div>
+              <div class="summary-row">
+                <span class="summary-row-label">Payment Terms</span>
+                <span class="summary-row-value" id="side-vendor-terms">-</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row-label">Outstanding (All)</span>
+                <span class="summary-row-value red" id="side-vendor-outstanding">₹0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- VANILLA JS LOGIC -->
+<script>
+  // Central Application State
+  const state = {
+    // Sequence counters
+    autoSequenceCounter: 142,
+    paymentSequenceCounter: 89,
+    
+    // Calculated Totals
+    taxableValue: 0.00,
+    cgstTotal: 0.00,
+    sgstTotal: 0.00,
+    igstTotal: 0.00,
+    invoiceTotal: 0.00,
+    netPayable: 0.00,
+    balanceDue: 0.00,
+    
+    // Document States
+    generatedInvoiceId: "",
+    status: "Draft", // Draft, Submitted, Approved, Posted to GL
+    
+    // UI steps
+    currentStep: 1,
+    maxReachedStep: 1,
+    
+    // Timeline list
+    timeline: []
+  };
+
+  // State code mapping to Indian States for GSTIN blur auto-suggest
+  const gstStateMap = {
+    "01": "Jammu and Kashmir",
+    "02": "Himachal Pradesh",
+    "03": "Punjab",
+    "04": "Chandigarh",
+    "05": "Uttarakhand",
+    "06": "Haryana",
+    "07": "Delhi",
+    "08": "Rajasthan",
+    "09": "Uttar Pradesh",
+    "10": "Bihar",
+    "11": "Sikkim",
+    "12": "Arunachal Pradesh",
+    "13": "Nagaland",
+    "14": "Manipur",
+    "15": "Mizoram",
+    "16": "Tripura",
+    "17": "Meghalaya",
+    "18": "Assam",
+    "19": "West Bengal",
+    "20": "Jharkhand",
+    "21": "Odisha",
+    "22": "Chhattisgarh",
+    "23": "Madhya Pradesh",
+    "24": "Gujarat",
+    "26": "Dadra and Nagar Haveli and Daman and Diu",
+    "27": "Maharashtra",
+    "29": "Karnataka",
+    "30": "Goa",
+    "31": "Lakshadweep",
+    "32": "Kerala",
+    "33": "Tamil Nadu",
+    "34": "Puducherry",
+    "35": "Andaman and Nicobar Islands",
+    "36": "Telangana",
+    "37": "Andhra Pradesh",
+    "38": "Ladakh"
+  };
+
+  // Helper: Get formatted current time
+  function getFormattedTime() {
+    const now = new Date();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    return `Today, ${hours}:${minutes} ${ampm}`;
+  }
+
+  // Helper: Date format string
+  function formatDateString(str) {
+    if (!str) return "-";
+    const parts = str.split("-"); // YYYY-MM-DD
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`; // DD-MM-YYYY
+    }
+    return str;
+  }
+
+  // ── STEPPER CONTROLS ──
+  function handleStepClick(stepNumber) {
+    if (stepNumber <= state.maxReachedStep) {
+      goToStep(stepNumber);
+    }
+  }
+
+  function goToStep(stepNumber) {
+    // Hide all screens
+    document.querySelectorAll(".screen").forEach(screen => {
+      screen.classList.remove("active");
+    });
+    
+    // Show target screen
+    document.getElementById(`screen-${stepNumber}`).classList.add("active");
+    state.currentStep = stepNumber;
+    
+    updateStepperUI();
+    updateBreadcrumb();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateStepperUI() {
+    const current = state.currentStep;
+    const max = state.maxReachedStep;
+    
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById(`dot-${i}`);
+      const label = document.getElementById(`label-${i}`);
+      const line = document.getElementById(`line-${i}`);
+      
+      dot.className = "step-dot";
+      label.className = "step-label";
+      if (line) line.className = "step-line";
+      
+      if (i === current) {
+        dot.classList.add("active");
+        label.classList.add("active");
+        dot.innerText = i.toString();
+      } else if (i < current) {
+        dot.classList.add("done");
+        label.classList.add("done");
+        dot.innerText = "✓";
+        if (line) line.classList.add("done");
+      } else {
+        dot.classList.add("inactive");
+        label.classList.add("inactive");
+        dot.innerText = i.toString();
+      }
+      
+      // Bind click triggers to parents
+      const stepNav = document.getElementById(`step-nav-${i}`);
+      if (i <= max) {
+        stepNav.style.cursor = "pointer";
+        stepNav.onclick = () => handleStepClick(i);
+      } else {
+        stepNav.style.cursor = "default";
+        stepNav.onclick = null;
+      }
+    }
+  }
+
+  function updateBreadcrumb() {
+    const current = state.currentStep;
+    const container = document.getElementById("breadcrumb-container");
+    
+    let html = `<a href="#">Dashboard</a> <span>›</span> <a href="#">Accounts Payable</a>`;
+    
+    if (current === 1) {
+      html += ` <span>›</span> <span style="color: var(--text-dark); font-weight: 500;">Create Invoice ID</span>`;
+    } else if (current === 2) {
+      html += ` <span>›</span> <a href="javascript:handleStepClick(1)">Create Invoice ID</a> <span>›</span> <span style="color: var(--text-dark); font-weight: 500;">Invoice Entry</span>`;
+    } else if (current === 3) {
+      html += ` <span>›</span> <a href="javascript:handleStepClick(1)">Create Invoice ID</a> <span>›</span> <a href="javascript:handleStepClick(2)">Invoice Entry</a> <span>›</span> <span style="color: var(--text-dark); font-weight: 500;">Approval Review</span>`;
+    } else if (current === 4) {
+      html += ` <span>›</span> <a href="javascript:handleStepClick(1)">Create Invoice ID</a> <span>›</span> <a href="javascript:handleStepClick(2)">Invoice Entry</a> <span>›</span> <a href="javascript:handleStepClick(3)">Approval Review</a> <span>›</span> <span style="color: var(--text-dark); font-weight: 500;">Payment Entry</span>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // ── AUTOMATION: INVOICE ID GENERATION ──
+  function generateInvoiceId() {
+    const prefixInput = document.getElementById("id-prefix");
+    const fySelect = document.getElementById("financial-year");
+    const seqTypeSelect = document.getElementById("sequence-type");
+    const manualSeqInput = document.getElementById("manual-sequence-no");
+    
+    const prefix = prefixInput.value.trim().toUpperCase() || "INV";
+    const fy = fySelect.value.substring(0, 4); // Extract "2025" from "2025-26"
+    
+    let seq = "";
+    if (seqTypeSelect.value === "Manual entry") {
+      const val = parseInt(manualSeqInput.value) || 1;
+      seq = String(val).padStart(5, '0');
+    } else {
+      seq = String(state.autoSequenceCounter).padStart(5, '0');
+    }
+    
+    const generatedId = `${prefix}-${fy}-${seq}`;
+    document.getElementById("generated-id-preview").innerText = generatedId;
+    state.generatedInvoiceId = generatedId;
+    
+    // Sync Screen 2 and 4 banners
+    document.getElementById("banner-invoice-id").innerText = generatedId;
+    document.getElementById("payment-banner-invoice-id").innerText = generatedId;
+    document.getElementById("review-banner-invoice-id").innerText = generatedId;
+  }
+
+  // Toggle manual sequence input disabled state
+  document.getElementById("sequence-type").addEventListener("change", function() {
+    const manualSeqInput = document.getElementById("manual-sequence-no");
+    if (this.value === "Manual entry") {
+      manualSeqInput.disabled = false;
+      manualSeqInput.required = true;
+      manualSeqInput.style.background = "";
+      manualSeqInput.focus();
+    } else {
+      manualSeqInput.disabled = true;
+      manualSeqInput.required = false;
+      manualSeqInput.value = "";
+      manualSeqInput.style.background = "var(--cream)";
+      manualSeqInput.classList.remove("error-input");
+    }
+  });
+
+  // Force ID Prefix to uppercase
+  document.getElementById("id-prefix").addEventListener("input", function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+  });
+
+  document.getElementById("btn-generate-id").addEventListener("click", generateInvoiceId);
+
+  // ── AUTOMATION: DUE DATE AUTO FILL ──
+  function calculateDueDate() {
+    const invoiceDateInput = document.getElementById("invoice-date");
+    const termsSelect = document.getElementById("payment-terms");
+    const dueDateInput = document.getElementById("due-date");
+    
+    if (!invoiceDateInput.value || !termsSelect.value) return;
+    
+    const invoiceDateObj = new Date(invoiceDateInput.value);
+    if (isNaN(invoiceDateObj.getTime())) return;
+    
+    let daysToAdd = 0;
+    const terms = termsSelect.value;
+    
+    if (terms === "Net 15") daysToAdd = 15;
+    else if (terms === "Net 30") daysToAdd = 30;
+    else if (terms === "Net 45") daysToAdd = 45;
+    else if (terms === "Net 60") daysToAdd = 60;
+    else if (terms === "Due on Receipt") daysToAdd = 0;
+    
+    const dueDateObj = new Date(invoiceDateObj);
+    dueDateObj.setDate(invoiceDateObj.getDate() + daysToAdd);
+    
+    const yyyy = dueDateObj.getFullYear();
+    const mm = String(dueDateObj.getMonth() + 1).padStart(2, '0');
+    const dd = String(dueDateObj.getDate()).padStart(2, '0');
+    
+    dueDateInput.value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  document.getElementById("invoice-date").addEventListener("change", calculateDueDate);
+  document.getElementById("payment-terms").addEventListener("change", calculateDueDate);
+
+  // ── AUTOMATION: GSTIN VALIDATION & STATE AUTO-SELECT ──
+  const gstinInput = document.getElementById("vendor-gstin");
+  const gstinStatus = document.getElementById("gstin-status");
+  const gstinError = document.getElementById("gstin-error");
+  const stateSelect = document.getElementById("vendor-state");
+
+  gstinInput.addEventListener("blur", function() {
+    const gstinVal = gstinInput.value.trim().toUpperCase();
+    gstinInput.value = gstinVal;
+    
+    if (gstinVal === "") {
+      gstinStatus.innerHTML = "";
+      gstinInput.classList.remove("error-input");
+      gstinError.style.display = "none";
+      return;
+    }
+    
+    // Auto suggest vendor state
+    if (gstinVal.length >= 2) {
+      const stateCode = gstinVal.substring(0, 2);
+      const mappedState = gstStateMap[stateCode];
+      if (mappedState) {
+        stateSelect.value = mappedState;
+        updateGstState();
+      }
+    }
+
+    // Auto extract PAN
+    if (gstinVal.length >= 10) {
+      const panVal = gstinVal.substring(2, 12);
+      document.getElementById("vendor-pan").value = panVal;
+    }
+    
+    // GSTIN Regex
+    const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    const isValid = gstinRegex.test(gstinVal);
+    
+    if (isValid) {
+      gstinStatus.innerHTML = "✔️";
+      gstinStatus.style.color = "var(--success)";
+      gstinInput.style.borderColor = "var(--success)";
+      gstinInput.classList.remove("error-input");
+      gstinError.style.display = "none";
+    } else {
+      gstinStatus.innerHTML = "❌";
+      gstinStatus.style.color = "#dc2626";
+      gstinInput.classList.add("error-input");
+      gstinError.style.display = "block";
+    }
+  });
+
+  // ── AUTOMATION: GST TYPE AUTO SWITCH ──
+  function updateGstState() {
+    const stateVal = stateSelect.value;
+    const isLocal = stateVal === "Maharashtra"; // Company State is Maharashtra (code 27)
+    
+    const rows = document.querySelectorAll("#line-items-tbody .line-row");
+    rows.forEach(row => {
+      const cgstPctInput = row.querySelector(".line-cgst-pct");
+      const sgstPctInput = row.querySelector(".line-sgst-pct");
+      const igstPctInput = row.querySelector(".line-igst-pct");
+      
+      if (isLocal) {
+        // Local GST: CGST/SGST active, IGST zero & disabled
+        let prevIgst = parseFloat(igstPctInput.value) || 0;
+        cgstPctInput.value = prevIgst > 0 ? (prevIgst / 2).toString() : "9";
+        sgstPctInput.value = prevIgst > 0 ? (prevIgst / 2).toString() : "9";
+        igstPctInput.value = "0";
+        
+        cgstPctInput.disabled = false;
+        sgstPctInput.disabled = false;
+        igstPctInput.disabled = true;
+      } else {
+        // Interstate GST: IGST active, CGST/SGST zero & disabled
+        let prevCgst = parseFloat(cgstPctInput.value) || 0;
+        let prevSgst = parseFloat(sgstPctInput.value) || 0;
+        igstPctInput.value = (prevCgst + prevSgst) > 0 ? (prevCgst + prevSgst).toString() : "18";
+        cgstPctInput.value = "0";
+        sgstPctInput.value = "0";
+        
+        cgstPctInput.disabled = true;
+        sgstPctInput.disabled = true;
+        igstPctInput.disabled = false;
+      }
+    });
+    
+    calculateTable();
+  }
+
+  stateSelect.addEventListener("change", updateGstState);
+
+  // ── AUTOMATION: LINE ITEM DYNAMIC TABLE ──
+  function addRow() {
+    const tbody = document.getElementById("line-items-tbody");
+    const tr = document.createElement("tr");
+    tr.className = "line-row";
+    
+    const isLocal = stateSelect.value === "Maharashtra";
+    
+    tr.innerHTML = `
+      <td><input type="text" class="line-desc" placeholder="Item description" required /></td>
+      <td><input type="text" class="line-hsn" placeholder="HSN" required /></td>
+      <td>
+        <select class="line-uom">
+          <option>PCS</option>
+          <option>KG</option>
+          <option>MTR</option>
+          <option>LTR</option>
+          <option>BOX</option>
+          <option>SET</option>
+        </select>
+      </td>
+      <td><input type="number" class="line-qty mono" value="1" min="1" style="text-align:right" /></td>
+      <td><input type="number" class="line-rate mono" value="0.00" min="0" step="0.01" style="text-align:right" /></td>
+      <td><span class="line-taxable mono">₹0.00</span></td>
+      <td><input type="number" class="line-cgst-pct mono" value="${isLocal ? 9 : 0}" min="0" max="100" style="text-align:right" ${isLocal ? '' : 'disabled'} /></td>
+      <td><span class="line-cgst-amt mono">₹0.00</span></td>
+      <td><input type="number" class="line-sgst-pct mono" value="${isLocal ? 9 : 0}" min="0" max="100" style="text-align:right" ${isLocal ? '' : 'disabled'} /></td>
+      <td><span class="line-sgst-amt mono">₹0.00</span></td>
+      <td><input type="number" class="line-igst-pct mono" value="${isLocal ? 0 : 18}" min="0" max="100" style="text-align:right" ${isLocal ? 'disabled' : ''} /></td>
+      <td><span class="line-igst-amt mono">₹0.00</span></td>
+      <td><span class="line-total mono" style="font-weight:600">₹0.00</span></td>
+      <td>
+        <button type="button" class="del-btn" title="Remove row">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.75 3.5h10.5M5.25 3.5V2.333A.583.583 0 0 1 5.833 1.75h2.334a.583.583 0 0 1 .583.583V3.5M11.083 3.5l-.583 8.167a.583.583 0 0 1-.583.583H4.083a.583.583 0 0 1-.583-.583L2.917 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </td>
+    `;
+    
+    tbody.appendChild(tr);
+    
+    // Bind delete row
+    tr.querySelector(".del-btn").addEventListener("click", function() {
+      if (tbody.querySelectorAll(".line-row").length > 1) {
+        tr.remove();
+        calculateTable();
+      } else {
+        alert("At least one line item is required on the invoice.");
+      }
+    });
+    
+    // Bind change listeners
+    tr.querySelectorAll("input, select").forEach(input => {
+      input.addEventListener("input", calculateTable);
+    });
+    
+    calculateTable();
+  }
+
+  document.getElementById("btn-add-item").addEventListener("click", addRow);
+
+  function calculateTable() {
+    const rows = document.querySelectorAll("#line-items-tbody .line-row");
+    let grandTaxable = 0;
+    let grandCgst = 0;
+    let grandSgst = 0;
+    let grandIgst = 0;
+    let grandTotal = 0;
+    
+    rows.forEach(row => {
+      const qty = parseFloat(row.querySelector(".line-qty").value) || 0;
+      const rate = parseFloat(row.querySelector(".line-rate").value) || 0;
+      
+      const taxable = qty * rate;
+      row.querySelector(".line-taxable").innerText = "₹" + taxable.toFixed(2);
+      
+      const cgstPct = parseFloat(row.querySelector(".line-cgst-pct").value) || 0;
+      const sgstPct = parseFloat(row.querySelector(".line-sgst-pct").value) || 0;
+      const igstPct = parseFloat(row.querySelector(".line-igst-pct").value) || 0;
+      
+      const cgstAmt = taxable * (cgstPct / 100);
+      const sgstAmt = taxable * (sgstPct / 100);
+      const igstAmt = taxable * (igstPct / 100);
+      
+      row.querySelector(".line-cgst-amt").innerText = "₹" + cgstAmt.toFixed(2);
+      row.querySelector(".line-sgst-amt").innerText = "₹" + sgstAmt.toFixed(2);
+      row.querySelector(".line-igst-amt").innerText = "₹" + igstAmt.toFixed(2);
+      
+      const rowTotal = taxable + cgstAmt + sgstAmt + igstAmt;
+      row.querySelector(".line-total").innerText = "₹" + rowTotal.toFixed(2);
+      
+      grandTaxable += taxable;
+      grandCgst += cgstAmt;
+      grandSgst += sgstAmt;
+      grandIgst += igstAmt;
+      grandTotal += rowTotal;
+    });
+    
+    // Update labels
+    document.getElementById("summary-taxable").innerText = "₹" + grandTaxable.toFixed(2);
+    document.getElementById("summary-cgst").innerText = "₹" + grandCgst.toFixed(2);
+    document.getElementById("summary-sgst").innerText = "₹" + grandSgst.toFixed(2);
+    document.getElementById("summary-igst").innerText = "₹" + grandIgst.toFixed(2);
+    document.getElementById("summary-total").innerText = "₹" + grandTotal.toFixed(2);
+    
+    // Amount in Words
+    document.getElementById("summary-words").innerText = convertNumberToWords(grandTotal);
+    
+    // Save state
+    state.taxableValue = grandTaxable;
+    state.cgstTotal = grandCgst;
+    state.sgstTotal = grandSgst;
+    state.igstTotal = grandIgst;
+    state.invoiceTotal = grandTotal;
+  }
+
+  // ── AUTOMATION: INDIAN SYSTEM AMOUNT TO WORDS ──
+  function convertNumberToWords(num) {
+    if (num <= 0) return "Zero Rupees Only";
+    
+    let parts = num.toFixed(2).split(".");
+    let rupees = parseInt(parts[0], 10);
+    let paise = parseInt(parts[1], 10);
+    
+    let rupeeWords = rupees > 0 ? convertIntegerToWords(rupees) + " Rupees" : "";
+    let paiseWords = paise > 0 ? convertIntegerToWords(paise) + " Paise" : "";
+    
+    let result = "";
+    if (rupeeWords && paiseWords) {
+      result = rupeeWords + " and " + paiseWords + " Only";
+    } else if (rupeeWords) {
+      result = rupeeWords + " Only";
+    } else if (paiseWords) {
+      result = paiseWords + " Only";
+    } else {
+      result = "Zero Rupees Only";
+    }
+    
+    return result;
+  }
+
+  function convertIntegerToWords(num) {
+    const a = [
+      '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+      'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    
+    if (num === 0) return '';
+    
+    function getWord(n) {
+      if (n < 20) return a[n];
+      if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? ' ' + a[n % 10] : '');
+      if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + getWord(n % 100) : '');
+      return '';
+    }
+    
+    let words = '';
+    
+    // Crore (1,00,00,000)
+    let crore = Math.floor(num / 10000000);
+    num %= 10000000;
+    if (crore > 0) {
+      words += convertIntegerToWords(crore) + ' Crore ';
+    }
+    
+    // Lakh (1,00,000)
+    let lakh = Math.floor(num / 100000);
+    num %= 100000;
+    if (lakh > 0) {
+      words += getWord(lakh) + ' Lakh ';
+    }
+    
+    // Thousand (1,000)
+    let thousand = Math.floor(num / 1000);
+    num %= 1000;
+    if (thousand > 0) {
+      words += getWord(thousand) + ' Thousand ';
+    }
+    
+    if (num > 0) {
+      words += getWord(num);
+    }
+    
+    return words.trim();
+  }
+
+  // ── AUTOMATION: SCREEN 4 NET PAYABLE & BALANCE CALCULATIONS ──
+  function calculatePaymentDeductions() {
+    const invoiceTotal = state.invoiceTotal;
+    
+    const tdsAmt = parseFloat(document.getElementById("tds-amount").value) || 0;
+    const discountAdvance = parseFloat(document.getElementById("discount-advance").value) || 0;
+    const otherDeductions = parseFloat(document.getElementById("other-deductions").value) || 0;
+    
+    const paymentAmtInput = document.getElementById("payment-amount");
+    const paymentAmt = parseFloat(paymentAmtInput.value) || 0;
+    
+    const totalDeductions = tdsAmt + discountAdvance + otherDeductions;
+    const netPayable = invoiceTotal - totalDeductions;
+    const balanceDue = netPayable - paymentAmt;
+    
+    // Set left panel values
+    document.getElementById("balance-invoice-total").innerText = "₹" + invoiceTotal.toFixed(2);
+    document.getElementById("balance-total-deductions").innerText = "− ₹" + totalDeductions.toFixed(2);
+    document.getElementById("balance-net-payable").innerText = "₹" + netPayable.toFixed(2);
+    
+    // Set right panel values
+    document.getElementById("side-balance-due").innerText = "₹" + balanceDue.toFixed(2);
+    
+    // Update local state
+    state.netPayable = netPayable;
+    state.balanceDue = balanceDue;
+  }
+
+  document.getElementById("tds-amount").addEventListener("input", calculatePaymentDeductions);
+  document.getElementById("discount-advance").addEventListener("input", calculatePaymentDeductions);
+  document.getElementById("other-deductions").addEventListener("input", calculatePaymentDeductions);
+  document.getElementById("payment-amount").addEventListener("input", calculatePaymentDeductions);
+
+  // Exchange rate config based on currency select
+  document.getElementById("payment-currency").addEventListener("change", function() {
+    const exRateInput = document.getElementById("exchange-rate");
+    const exHint = document.getElementById("exchange-hint");
+    if (this.value === "INR") {
+      exRateInput.value = "1.00";
+      exRateInput.readOnly = true;
+      exRateInput.style.background = "var(--cream)";
+      exHint.innerText = "Locked for INR payments";
+    } else {
+      exRateInput.readOnly = false;
+      exRateInput.style.background = "";
+      exRateInput.value = this.value === "USD" ? "83.5000" : "89.8000"; // Mock rate defaults
+      exHint.innerText = `Current mock ${this.value} rate`;
+    }
+  });
+
+  // Cheque input field toggle based on payment mode dropdown
+  document.getElementById("payment-mode").addEventListener("change", function() {
+    const mode = this.value;
+    const chequeInputs = ["cheque-no", "cheque-date", "cheque-bank"];
+    const utrStar = document.getElementById("utr-req-star");
+    const chqStar = document.getElementById("chq-req-star");
+    
+    chequeInputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (mode === "Cheque") {
+        el.disabled = false;
+        el.required = true;
+        el.style.background = "";
+      } else {
+        el.disabled = true;
+        el.required = false;
+        el.value = "";
+        el.style.background = "var(--cream)";
+        el.classList.remove("error-input");
+      }
+    });
+
+    if (mode === "Cheque") {
+      chqStar.style.display = "inline";
+    } else {
+      chqStar.style.display = "none";
+    }
+    
+    // Transaction/UTR code mandatory for bank transfer methods
+    const utrInput = document.getElementById("transaction-utr");
+    if (["NEFT", "RTGS", "IMPS", "Bank Transfer"].includes(mode)) {
+      utrInput.required = true;
+      utrStar.style.display = "inline";
+    } else {
+      utrInput.required = false;
+      utrStar.style.display = "none";
+      utrInput.classList.remove("error-input");
+    }
+  });
+
+  // ── TRANSITION FLOWS & VALIDATION ──
+  
+  // Clean inputs on navigation warning reset
+  function clearErrorsOnForm(formId) {
+    const form = document.getElementById(formId);
+    form.querySelectorAll(".error-input").forEach(el => el.classList.remove("error-input"));
+  }
+
+  // SCREEN 1 CONFIRM BUTTON
+  document.getElementById("btn-confirm-s1").addEventListener("click", function() {
+    clearErrorsOnForm("form-screen-1");
+    
+    // Manual validation triggers
+    const fy = document.getElementById("financial-year");
+    const type = document.getElementById("invoice-type");
+    const dept = document.getElementById("department");
+    const vName = document.getElementById("vendor-name-s1");
+    const vInvNo = document.getElementById("vendor-invoice-no-s1");
+    const vInvDate = document.getElementById("vendor-invoice-date-s1");
+    const prefix = document.getElementById("id-prefix");
+    const manualSeq = document.getElementById("manual-sequence-no");
+    const seqType = document.getElementById("sequence-type");
+    
+    let isFormValid = true;
+    
+    const required = [fy, type, dept, vName, vInvNo, vInvDate, prefix];
+    required.forEach(el => {
+      if (!el.value) {
+        el.classList.add("error-input");
+        isFormValid = false;
+      }
+    });
+    
+    if (seqType.value === "Manual entry" && (!manualSeq.value || parseInt(manualSeq.value) <= 0)) {
+      manualSeq.classList.add("error-input");
+      isFormValid = false;
+    }
+    
+    const prefixRegex = /^[A-Z]{2,5}$/;
+    if (!prefixRegex.test(prefix.value.trim().toUpperCase())) {
+      prefix.classList.add("error-input");
+      alert("Invoice ID Prefix must be between 2 and 5 characters (A-Z only).");
+      isFormValid = false;
+    }
+    
+    if (!isFormValid) {
+      alert("Please correct the highlighted classification and reference fields.");
+      return;
+    }
+    
+    // Generate invoice key if not generated
+    generateInvoiceId();
+    
+    // Sync Screen 1 elements into Screen 2 fields
+    document.getElementById("invoice-number").value = vInvNo.value;
+    document.getElementById("invoice-date").value = vInvDate.value;
+    document.getElementById("invoice-type-s2").value = type.value;
+    document.getElementById("po-number").value = document.getElementById("po-reference-s1").value;
+    document.getElementById("vendor-name-s2").value = vName.value;
+    document.getElementById("banner-vendor-name").innerText = vName.value;
+    
+    // Append Timeline log
+    state.timeline = [
+      { label: "Invoice ID Created", time: getFormattedTime(), user: "AP Clerk", dotClass: "green" }
+    ];
+    
+    state.maxReachedStep = Math.max(state.maxReachedStep, 2);
+    goToStep(2);
+  });
+
+  // SCREEN 2 SUBMIT BUTTON
+  document.getElementById("btn-submit-s2").addEventListener("click", function() {
+    clearErrorsOnForm("form-screen-2");
+    
+    const invNo = document.getElementById("invoice-number");
+    const invDate = document.getElementById("invoice-date");
+    const terms = document.getElementById("payment-terms");
+    const vName = document.getElementById("vendor-name-s2");
+    const gstin = document.getElementById("vendor-gstin");
+    const stateVal = document.getElementById("vendor-state");
+    
+    let isFormValid = true;
+    
+    const required = [invNo, invDate, terms, vName, gstin, stateVal];
+    required.forEach(el => {
+      if (!el.value) {
+        el.classList.add("error-input");
+        isFormValid = false;
+      }
+    });
+
+    // Validate date is not future date
+    if (invDate.value) {
+      const selectedDate = new Date(invDate.value);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      selectedDate.setHours(0,0,0,0);
+      
+      if (selectedDate > today) {
+        invDate.classList.add("error-input");
+        alert("Invoice Date cannot be a future date.");
+        isFormValid = false;
+      }
+    }
+    
+    // Validate GSTIN pattern
+    const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (gstin.value && !gstinRegex.test(gstin.value.toUpperCase())) {
+      gstin.classList.add("error-input");
+      alert("Please enter a valid GSTIN format (e.g. 27AAAAA1111A1Z5).");
+      isFormValid = false;
+    }
+    
+    // Validate Table lines
+    const rows = document.querySelectorAll("#line-items-tbody .line-row");
+    if (rows.length === 0) {
+      alert("At least one line item is required on the invoice. Use 'Add Item' to insert a row.");
+      isFormValid = false;
+    } else {
+      rows.forEach(row => {
+        const desc = row.querySelector(".line-desc");
+        const hsn = row.querySelector(".line-hsn");
+        const qty = row.querySelector(".line-qty");
+        const rate = row.querySelector(".line-rate");
+        
+        if (!desc.value) { desc.classList.add("error-input"); isFormValid = false; }
+        if (!hsn.value) { hsn.classList.add("error-input"); isFormValid = false; }
+        if (!qty.value || parseFloat(qty.value) <= 0) { qty.classList.add("error-input"); isFormValid = false; }
+        if (!rate.value || parseFloat(rate.value) <= 0) { rate.classList.add("error-input"); isFormValid = false; }
+      });
+    }
+    
+    if (!isFormValid) {
+      alert("Please fill in all mandatory fields highlighted in red.");
+      return;
+    }
+    
+    // Record log
+    state.timeline.push({ label: "Invoice Submitted for Approval", time: getFormattedTime(), user: "AP Clerk", dotClass: "green" });
+    
+    // Load screen 3 read-only page
+    populateScreen3();
+    
+    state.maxReachedStep = Math.max(state.maxReachedStep, 3);
+    goToStep(3);
+  });
+
+  // SCREEN 3: RENDER READ ONLY DETAILS
+  function populateScreen3() {
+    document.getElementById("read-fy").innerText = document.getElementById("financial-year").value;
+    document.getElementById("read-type").innerText = document.getElementById("invoice-type-s2").value;
+    document.getElementById("read-dept").innerText = document.getElementById("department").value;
+    document.getElementById("read-cc").innerText = document.getElementById("cost-center").value || "N/A";
+    document.getElementById("read-bu").innerText = document.getElementById("business-unit").value || "N/A";
+    document.getElementById("read-priority").innerText = document.getElementById("priority").value;
+    
+    document.getElementById("read-invoice-no").innerText = document.getElementById("invoice-number").value;
+    document.getElementById("read-invoice-date").innerText = formatDateString(document.getElementById("invoice-date").value);
+    document.getElementById("read-due-date").innerText = formatDateString(document.getElementById("due-date").value);
+    document.getElementById("read-terms").innerText = document.getElementById("payment-terms").value;
+    document.getElementById("read-po-no").innerText = document.getElementById("po-number").value || "N/A";
+    
+    document.getElementById("read-vendor-name").innerText = document.getElementById("vendor-name-s2").value;
+    document.getElementById("read-vendor-gstin").innerText = document.getElementById("vendor-gstin").value.toUpperCase();
+    document.getElementById("read-vendor-pan").innerText = document.getElementById("vendor-pan").value || "N/A";
+    document.getElementById("read-vendor-address").innerText = document.getElementById("vendor-address").value || "N/A";
+    document.getElementById("read-vendor-state").innerText = document.getElementById("vendor-state").value;
+    
+    document.getElementById("read-bank-name").innerText = document.getElementById("bank-name").value || "N/A";
+    document.getElementById("read-bank-account").innerText = document.getElementById("bank-account").value || "N/A";
+    document.getElementById("read-bank-ifsc").innerText = document.getElementById("bank-ifsc").value || "N/A";
+    document.getElementById("read-bank-branch").innerText = document.getElementById("bank-branch").value || "N/A";
+    
+    document.getElementById("read-tc").innerText = document.getElementById("terms-conditions").value || "N/A";
+    document.getElementById("read-signatory-name").innerText = document.getElementById("signatory-name").value || "N/A";
+    document.getElementById("read-signatory-desig").innerText = document.getElementById("signatory-designation").value || "N/A";
+    
+    // Line items copy
+    const tbodySource = document.getElementById("line-items-tbody");
+    const tbodyDest = document.getElementById("read-line-items-tbody");
+    tbodyDest.innerHTML = "";
+    
+    const rows = tbodySource.querySelectorAll(".line-row");
+    rows.forEach(row => {
+      const desc = row.querySelector(".line-desc").value;
+      const hsn = row.querySelector(".line-hsn").value;
+      const uom = row.querySelector(".line-uom").value;
+      const qty = row.querySelector(".line-qty").value;
+      const rate = row.querySelector(".line-rate").value;
+      const taxable = row.querySelector(".line-taxable").innerText;
+      const cgstPct = row.querySelector(".line-cgst-pct").value;
+      const cgstAmt = row.querySelector(".line-cgst-amt").innerText;
+      const sgstPct = row.querySelector(".line-sgst-pct").value;
+      const sgstAmt = row.querySelector(".line-sgst-amt").innerText;
+      const igstPct = row.querySelector(".line-igst-pct").value;
+      const igstAmt = row.querySelector(".line-igst-amt").innerText;
+      const total = row.querySelector(".line-total").innerText;
+      
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${desc}</td>
+        <td>${hsn}</td>
+        <td>${uom}</td>
+        <td class="right mono">${qty}</td>
+        <td class="right mono">₹${parseFloat(rate).toFixed(2)}</td>
+        <td class="right mono">${taxable}</td>
+        <td class="right mono">${cgstPct}%</td>
+        <td class="right mono">${cgstAmt}</td>
+        <td class="right mono">${sgstPct}%</td>
+        <td class="right mono">${sgstAmt}</td>
+        <td class="right mono">${igstPct}%</td>
+        <td class="right mono">${igstAmt}</td>
+        <td class="right mono" style="font-weight:600;">${total}</td>
+      `;
+      tbodyDest.appendChild(tr);
+    });
+    
+    // Copy summary totals
+    document.getElementById("read-summary-taxable").innerText = document.getElementById("summary-taxable").innerText;
+    document.getElementById("read-summary-cgst").innerText = document.getElementById("summary-cgst").innerText;
+    document.getElementById("read-summary-sgst").innerText = document.getElementById("summary-sgst").innerText;
+    document.getElementById("read-summary-igst").innerText = document.getElementById("summary-igst").innerText;
+    document.getElementById("read-summary-total").innerText = document.getElementById("summary-total").innerText;
+    document.getElementById("read-summary-words").innerText = document.getElementById("summary-words").innerText;
+    
+    // Copy details to banner
+    document.getElementById("review-banner-vendor").innerText = document.getElementById("vendor-name-s2").value;
+    document.getElementById("review-banner-total").innerText = document.getElementById("summary-total").innerText;
+
+    // Default approver fields
+    document.getElementById("approver-name").value = "";
+    document.getElementById("approver-remarks").value = "";
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById("approver-date").value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  // SCREEN 3: APPROVE ACTION
+  document.getElementById("btn-approve-invoice").addEventListener("click", function() {
+    clearErrorsOnForm("screen-3");
+    
+    const appNameInput = document.getElementById("approver-name");
+    const appDateInput = document.getElementById("approver-date");
+    const remarks = document.getElementById("approver-remarks").value.trim();
+    
+    if (!appNameInput.value) {
+      appNameInput.classList.add("error-input");
+      alert("Approver Name is mandatory.");
+      return;
+    }
+    
+    // Update status
+    state.status = "Approved";
+    document.getElementById("banner-status").innerText = "Approved";
+    document.getElementById("banner-status").className = "badge badge-approved";
+    
+    // Append Timeline log
+    state.timeline.push({ 
+      label: "Invoice Approved by Manager", 
+      time: getFormattedTime(), 
+      user: appNameInput.value, 
+      dotClass: "green",
+      remarks: remarks || null
+    });
+    
+    populateScreen4();
+    
+    state.maxReachedStep = Math.max(state.maxReachedStep, 4);
+    goToStep(4);
+  });
+
+  // SCREEN 3: REJECT ACTION
+  document.getElementById("btn-reject-invoice").addEventListener("click", function() {
+    const appNameInput = document.getElementById("approver-name");
+    const remarks = document.getElementById("approver-remarks").value.trim();
+    
+    if (!appNameInput.value) {
+      appNameInput.classList.add("error-input");
+      alert("Approver Name is mandatory to submit a rejection response.");
+      return;
+    }
+    
+    // Reset status
+    state.status = "Draft";
+    document.getElementById("banner-status").innerText = "Draft";
+    document.getElementById("banner-status").className = "badge badge-draft";
+    
+    state.timeline.push({ 
+      label: "Invoice Rejected & Sent Back", 
+      time: getFormattedTime(), 
+      user: appNameInput.value, 
+      dotClass: "red",
+      remarks: remarks || "No remarks provided."
+    });
+    
+    // Go back to Screen 2 for corrections
+    goToStep(2);
+  });
+
+  // SCREEN 4: RENDER PAYMENT DATA
+  function populateScreen4() {
+    const vendorName = document.getElementById("vendor-name-s2").value;
+    const totalStr = document.getElementById("summary-total").innerText;
+    const taxableStr = document.getElementById("summary-taxable").innerText;
+    const cgstStr = document.getElementById("summary-cgst").innerText;
+    const sgstStr = document.getElementById("summary-sgst").innerText;
+    const igstStr = document.getElementById("summary-igst").innerText;
+    
+    document.getElementById("payment-banner-vendor").innerText = vendorName;
+    document.getElementById("payment-banner-date").innerText = formatDateString(document.getElementById("invoice-date").value);
+    document.getElementById("payment-banner-due").innerText = formatDateString(document.getElementById("due-date").value);
+    document.getElementById("payment-banner-total").innerText = totalStr;
+    
+    // Sync Vendor Bank Account
+    document.getElementById("pay-vendor-bank").innerText = document.getElementById("bank-name").value || "N/A";
+    document.getElementById("pay-vendor-account").innerText = document.getElementById("bank-account").value || "N/A";
+    document.getElementById("pay-vendor-ifsc").innerText = document.getElementById("bank-ifsc").value || "N/A";
+    document.getElementById("pay-vendor-branch").innerText = document.getElementById("bank-branch").value || "N/A";
+    
+    // Right panel data
+    document.getElementById("side-taxable").innerText = taxableStr;
+    document.getElementById("side-cgst").innerText = cgstStr;
+    document.getElementById("side-sgst").innerText = sgstStr;
+    document.getElementById("side-igst").innerText = igstStr;
+    document.getElementById("side-invoice-total").innerText = totalStr;
+    document.getElementById("side-paid").innerText = "₹0.00";
+    document.getElementById("side-balance-due").innerText = totalStr;
+    
+    document.getElementById("side-vendor-name").innerText = vendorName;
+    document.getElementById("side-vendor-gstin").innerText = document.getElementById("vendor-gstin").value.toUpperCase();
+    document.getElementById("side-vendor-address").innerText = document.getElementById("vendor-address").value || "N/A";
+    document.getElementById("side-vendor-terms").innerText = document.getElementById("payment-terms").value;
+    document.getElementById("side-vendor-outstanding").innerText = totalStr;
+    
+    // Auto populate payment reference number
+    const prefix = "PAY-" + new Date().getFullYear();
+    const seq = String(state.paymentSequenceCounter).padStart(5, '0');
+    document.getElementById("payment-ref-no").value = `${prefix}-${seq}`;
+    
+    // Default payment amount to net payable (starts equal to total)
+    document.getElementById("payment-amount").value = state.invoiceTotal.toFixed(2);
+    
+    // Default Narration
+    document.getElementById("gl-narration").value = `Payment against Invoice ${state.generatedInvoiceId} to ${vendorName}`;
+    
+    renderTimeline();
+    calculatePaymentDeductions();
+  }
+
+  function renderTimeline() {
+    const container = document.getElementById("timeline-list");
+    container.innerHTML = "";
+    
+    state.timeline.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "timeline-item";
+      div.innerHTML = `
+        <div class="timeline-dot ${item.dotClass || ''}"></div>
+        <div class="timeline-content">
+          <div class="timeline-label">${item.label}</div>
+          <div class="timeline-sub">${item.time} · ${item.user}</div>
+          ${item.remarks ? `<div class="timeline-sub" style="font-style: italic; color: var(--navy); margin-top: 4px;">"${item.remarks}"</div>` : ''}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // SCREEN 4: POST PAYMENT TO GL
+  document.getElementById("btn-post-gl").addEventListener("click", function() {
+    clearErrorsOnForm("form-screen-4");
+    
+    const payRef = document.getElementById("payment-ref-no");
+    const payDate = document.getElementById("payment-date");
+    const payMode = document.getElementById("payment-mode");
+    const payAmtInput = document.getElementById("payment-amount");
+    const debitAcc = document.getElementById("gl-debit-account");
+    const creditAcc = document.getElementById("gl-credit-account");
+    
+    let isFormValid = true;
+    
+    const required = [payRef, payDate, payMode, payAmtInput, debitAcc, creditAcc];
+    required.forEach(el => {
+      if (!el.value) {
+        el.classList.add("error-input");
+        isFormValid = false;
+      }
+    });
+
+    const paymentAmt = parseFloat(payAmtInput.value) || 0;
+    if (paymentAmt <= 0) {
+      payAmtInput.classList.add("error-input");
+      alert("Payment Amount must be a positive number.");
+      isFormValid = false;
+    } else if (paymentAmt > state.netPayable) {
+      payAmtInput.classList.add("error-input");
+      alert(`Payment Amount (₹${paymentAmt.toFixed(2)}) cannot exceed the Net Payable amount (₹${state.netPayable.toFixed(2)}).`);
+      isFormValid = false;
+    }
+    
+    // Transfer mode UTR verification
+    const utrInput = document.getElementById("transaction-utr");
+    if (["NEFT", "RTGS", "IMPS", "Bank Transfer"].includes(payMode.value) && !utrInput.value) {
+      utrInput.classList.add("error-input");
+      alert("A Transaction/UTR Number is required for electronic bank transfers.");
+      isFormValid = false;
+    }
+    
+    // Cheque validation
+    const chqNo = document.getElementById("cheque-no");
+    const chqDate = document.getElementById("cheque-date");
+    const chqBank = document.getElementById("cheque-bank");
+    if (payMode.value === "Cheque") {
+      if (!chqNo.value) { chqNo.classList.add("error-input"); isFormValid = false; }
+      if (!chqDate.value) { chqDate.classList.add("error-input"); isFormValid = false; }
+      if (!chqBank.value) { chqBank.classList.add("error-input"); isFormValid = false; }
+    }
+    
+    if (!isFormValid) {
+      alert("Please resolve form validations highlighted in red before posting.");
+      return;
+    }
+    
+    // Success State
+    state.status = "Posted to GL";
+    document.getElementById("payment-banner-status").innerText = "Posted to GL";
+    document.getElementById("payment-banner-status").className = "badge badge-posted";
+    document.getElementById("banner-status").innerText = "Posted to GL";
+    document.getElementById("banner-status").className = "badge badge-posted";
+    
+    // Update Right Panel outstanding balances
+    document.getElementById("side-paid").innerText = "₹" + paymentAmt.toFixed(2);
+    document.getElementById("side-balance-due").innerText = "₹" + (state.netPayable - paymentAmt).toFixed(2);
+    document.getElementById("side-vendor-outstanding").innerText = "₹" + (state.netPayable - paymentAmt).toFixed(2);
+    
+    // Append Timeline Log
+    state.timeline.push({ 
+      label: `Payment Recorded & GL Entry Posted (${payMode.value})`, 
+      time: getFormattedTime(), 
+      user: "Finance Specialist", 
+      dotClass: "green" 
+    });
+    
+    renderTimeline();
+    
+    // Display Success Banner
+    document.getElementById("success-debit").innerText = debitAcc.value;
+    document.getElementById("success-credit").innerText = creditAcc.value;
+    document.getElementById("success-period").innerText = document.getElementById("gl-posting-period").value;
+    document.getElementById("posted-success-banner").style.display = "flex";
+    
+    // Disable all fields on Screen 4 to lock the posted ledger
+    document.getElementById("form-screen-4").querySelectorAll("input, select, textarea, button").forEach(el => {
+      el.disabled = true;
+      if (el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA") {
+        el.style.background = "var(--cream)";
+      }
+    });
+
+    // Hide payment actions and show a done button
+    document.getElementById("pay-actions-right").innerHTML = `
+      <button type="button" class="btn btn-secondary" onclick="printVoucher()" style="margin-right: 10px;">Print AP Voucher 🖨️</button>
+      <button type="button" class="btn btn-primary" onclick="resetForm()">Create New Invoice ID Cycle ✓</button>
+    `;
+    
+    // Update sequence counter for next invoice
+    state.autoSequenceCounter++;
+    state.paymentSequenceCounter++;
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ── PRINT AP VOUCHER ──
+  function printVoucher() {
+    const printWindow = window.open("", "_blank");
+    
+    const invId = state.generatedInvoiceId;
+    const payRef = document.getElementById("payment-ref-no").value;
+    const payDate = formatDateString(document.getElementById("payment-date").value);
+    const payMode = document.getElementById("payment-mode").value;
+    const utr = document.getElementById("transaction-utr").value || "N/A";
+    
+    const debitAcc = document.getElementById("gl-debit-account").value;
+    const creditAcc = document.getElementById("gl-credit-account").value;
+    const cc = document.getElementById("gl-cost-center").value || "N/A";
+    const narration = document.getElementById("gl-narration").value;
+    const period = document.getElementById("gl-posting-period").value;
+    
+    const vendorName = document.getElementById("vendor-name-s2").value;
+    const gstin = document.getElementById("vendor-gstin").value.toUpperCase();
+    const pan = document.getElementById("vendor-pan").value || "N/A";
+    const addr = document.getElementById("vendor-address").value || "N/A";
+    const stateVal = document.getElementById("vendor-state").value;
+    
+    const bankName = document.getElementById("bank-name").value || "N/A";
+    const bankAccount = document.getElementById("bank-account").value || "N/A";
+    const bankIfsc = document.getElementById("bank-ifsc").value || "N/A";
+    const bankBranch = document.getElementById("bank-branch").value || "N/A";
+    
+    const payAmt = parseFloat(document.getElementById("payment-amount").value) || 0;
+    const tdsAmt = parseFloat(document.getElementById("tds-amount").value) || 0;
+    const tdsSect = document.getElementById("tds-section").value;
+    const disc = parseFloat(document.getElementById("discount-advance").value) || 0;
+    const otherDed = parseFloat(document.getElementById("other-deductions").value) || 0;
+    const dedReason = document.getElementById("deduction-reason").value || "N/A";
+    
+    // Re-serialize line items
+    let linesHtml = "";
+    const rows = document.querySelectorAll("#line-items-tbody .line-row");
+    rows.forEach((row, index) => {
+      const desc = row.querySelector(".line-desc").value;
+      const hsn = row.querySelector(".line-hsn").value;
+      const uom = row.querySelector(".line-uom").value;
+      const qty = row.querySelector(".line-qty").value;
+      const rate = parseFloat(row.querySelector(".line-rate").value) || 0;
+      const taxable = parseFloat(row.querySelector(".line-qty").value) * parseFloat(row.querySelector(".line-rate").value) || 0;
+      const cgstPct = row.querySelector(".line-cgst-pct").value;
+      const sgstPct = row.querySelector(".line-sgst-pct").value;
+      const igstPct = row.querySelector(".line-igst-pct").value;
+      const total = row.querySelector(".line-total").innerText;
+      
+      linesHtml += `
+        <tr>
+          <td style="text-align: center;">${index + 1}</td>
+          <td>${desc}</td>
+          <td style="text-align: center;">${hsn}</td>
+          <td style="text-align: center;">${uom}</td>
+          <td style="text-align: right;">${qty}</td>
+          <td style="text-align: right;">₹${rate.toFixed(2)}</td>
+          <td style="text-align: right;">₹${taxable.toFixed(2)}</td>
+          <td style="text-align: right;">${cgstPct}%</td>
+          <td style="text-align: right;">${sgstPct}%</td>
+          <td style="text-align: right;">${igstPct}%</td>
+          <td style="text-align: right; font-weight: bold;">${total}</td>
+        </tr>
+      `;
+    });
+    
+    // Timeline events for printing
+    let timelineHtml = "";
+    state.timeline.forEach(item => {
+      timelineHtml += `
+        <div style="margin-bottom: 8px; font-size: 11px;">
+          <strong>[${item.time}]</strong> ${item.label} (${item.user})
+          ${item.remarks ? `<div style="margin-left: 20px; font-style: italic; color: #555;">"${item.remarks}"</div>` : ''}
+        </div>
+      `;
+    });
+
+    const totalDeductions = tdsAmt + disc + otherDed;
+    const words = convertNumberToWords(payAmt);
+    
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>AP Voucher — ${invId}</title>
+        <style>
+          body { font-family: 'DM Sans', Arial, sans-serif; color: #1e2a38; padding: 30px; line-height: 1.4; font-size: 12px; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #c9a227; padding-bottom: 15px; margin-bottom: 20px; }
+          .logo-wrap { display: flex; align-items: center; gap: 12px; }
+          .logo-img { width: 50px; height: 50px; object-fit: contain; }
+          .company-name { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+          .company-sub { font-size: 10px; color: #666; }
+          .voucher-title { font-size: 18px; font-weight: bold; text-align: right; color: #1e2a38; }
+          .voucher-id { font-size: 14px; text-align: right; color: #c9a227; font-family: monospace; margin-top: 5px; }
+          
+          .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+          .card { border: 1px solid #d4d9e0; border-radius: 6px; padding: 12px; background: #faf9f7; }
+          .card-title { font-size: 10px; font-weight: bold; color: #c9a227; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #e8e4db; padding-bottom: 4px; }
+          .meta-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+          .meta-label { font-weight: bold; color: #7a8699; font-size: 11px; }
+          .meta-val { font-family: monospace; }
+          
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th { background: #1e2a38; color: #e8d08a; padding: 8px; font-size: 10px; text-transform: uppercase; border: 1px solid #d4d9e0; }
+          td { padding: 8px; border: 1px solid #d4d9e0; font-size: 11px; }
+          
+          .summary-box { display: flex; justify-content: flex-end; margin-bottom: 30px; }
+          .summary-table { width: 300px; }
+          .summary-table td { padding: 6px 12px; }
+          .summary-table tr.total-row { font-weight: bold; background: #1e2a38; color: #fff; }
+          .summary-table tr.total-row td { color: #c9a227; }
+          
+          .timeline-card { border: 1px solid #d4d9e0; border-radius: 6px; padding: 15px; margin-bottom: 30px; }
+          
+          .footer-sig { display: flex; justify-content: space-between; margin-top: 50px; }
+          .sig-block { text-align: center; width: 180px; }
+          .sig-line { border-bottom: 1px solid #666; margin-bottom: 8px; height: 40px; }
+          .sig-label { font-size: 11px; font-weight: bold; }
+          
+          .watermark { position: absolute; top: 30%; left: 35%; font-size: 80px; color: rgba(22,163,74,0.1); transform: rotate(-30deg); font-weight: bold; border: 10px solid rgba(22,163,74,0.1); padding: 10px 30px; border-radius: 20px; pointer-events: none; text-transform: uppercase; }
+          @media print {
+            body { padding: 0; }
+            .card { background: #fff !important; }
+            .watermark { color: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.05) !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="watermark">GL POSTED</div>
+        
+        <div class="header">
+          <div class="logo-wrap">
+            <img src="logo.jpg" class="logo-img" alt="Logo" />
+            <div>
+              <div class="company-name">digiketing software consulting ltd</div>
+              <div class="company-sub">Accounts Payable Journal Voucher</div>
+            </div>
+          </div>
+          <div>
+            <div class="voucher-title">JOURNAL VOUCHER</div>
+            <div class="voucher-id">PAYMENT REF: ${payRef}</div>
+          </div>
+        </div>
+        
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">Voucher Details</div>
+            <div class="meta-row"><span class="meta-label">Invoice ID:</span><span class="meta-val" style="font-weight: bold;">${invId}</span></div>
+            <div class="meta-row"><span class="meta-label">Invoice Date:</span><span class="meta-val">${formatDateString(document.getElementById("invoice-date").value)}</span></div>
+            <div class="meta-row"><span class="meta-label">Payment Date:</span><span class="meta-val">${payDate}</span></div>
+            <div class="meta-row"><span class="meta-label">Payment Mode:</span><span class="meta-val">${payMode}</span></div>
+            <div class="meta-row"><span class="meta-label">Transaction / UTR:</span><span class="meta-val">${utr}</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Vendor Details</div>
+            <div class="meta-row"><span class="meta-label">Name:</span><span class="meta-val" style="font-weight: bold;">${vendorName}</span></div>
+            <div class="meta-row"><span class="meta-label">GSTIN:</span><span class="meta-val">${gstin}</span></div>
+            <div class="meta-row"><span class="meta-label">PAN:</span><span class="meta-val">${pan}</span></div>
+            <div class="meta-row"><span class="meta-label">State:</span><span class="meta-val">${stateVal}</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">GL Posting Details</div>
+            <div class="meta-row"><span class="meta-label">Debit A/C:</span><span class="meta-val">${debitAcc}</span></div>
+            <div class="meta-row"><span class="meta-label">Credit A/C:</span><span class="meta-val">${creditAcc}</span></div>
+            <div class="meta-row"><span class="meta-label">Posting Period:</span><span class="meta-val">${period}</span></div>
+            <div class="meta-row"><span class="meta-label">Cost Center:</span><span class="meta-val">${cc}</span></div>
+            <div class="meta-row"><span class="meta-label">Narration:</span><span class="meta-val" style="font-size: 10px;">${narration}</span></div>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-title">Bank Accounts Info</div>
+          <div style="display: flex; justify-content: space-between;">
+            <div style="width: 48%;">
+              <div style="font-weight: bold; font-size: 11px; margin-bottom: 4px; color: #777;">VENDOR BANK DETAILS (CREDIT DESTINATION)</div>
+              <div><strong>Bank:</strong> ${bankName}</div>
+              <div><strong>Account No:</strong> ${bankAccount}</div>
+              <div><strong>IFSC Code:</strong> ${bankIfsc}</div>
+              <div><strong>Branch:</strong> ${bankBranch}</div>
+            </div>
+            <div style="width: 48%; border-left: 1px solid #d4d9e0; padding-left: 20px;">
+              <div style="font-weight: bold; font-size: 11px; margin-bottom: 4px; color: #777;">PAYING BANK DETAILS (DEBIT SOURCE)</div>
+              <div><strong>Paying Bank:</strong> ${document.getElementById("paying-bank").value || "N/A"}</div>
+              <div><strong>Account No:</strong> ${document.getElementById("paying-account").value || "N/A"}</div>
+              \${payMode === "Cheque" ? \`
+                <div><strong>Cheque No:</strong> \${document.getElementById("cheque-no").value || "N/A"}</div>
+                <div><strong>Cheque Date:</strong> \${formatDateString(document.getElementById("cheque-date").value)}</div>
+              \` : ""}
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-title" style="margin-bottom: 8px;">Purchase Line Items</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 5%">Sr</th>
+              <th>Description</th>
+              <th style="width: 10%">HSN</th>
+              <th style="width: 8%">UOM</th>
+              <th style="width: 8%">Qty</th>
+              <th style="width: 10%">Rate</th>
+              <th style="width: 12%">Taxable</th>
+              <th style="width: 7%">CGST</th>
+              <th style="width: 7%">SGST</th>
+              <th style="width: 7%">IGST</th>
+              <th style="width: 12%">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            \${linesHtml}
+          </tbody>
+        </table>
+        
+        <div class="summary-box">
+          <table class="summary-table">
+            <tr>
+              <td>Taxable Subtotal:</td>
+              <td style="text-align: right; font-family: monospace;">₹\${state.taxableValue.toFixed(2)}</td>
+            </tr>
+            \${state.cgstTotal > 0 ? \`
+              <tr>
+                <td>CGST Total:</td>
+                <td style="text-align: right; font-family: monospace;">₹\${state.cgstTotal.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>SGST Total:</td>
+                <td style="text-align: right; font-family: monospace;">₹\${state.sgstTotal.toFixed(2)}</td>
+              </tr>
+            \` : ""}
+            \${state.igstTotal > 0 ? \`
+              <tr>
+                <td>IGST Total:</td>
+                <td style="text-align: right; font-family: monospace;">₹\${state.igstTotal.toFixed(2)}</td>
+              </tr>
+            \` : ""}
+            <tr style="border-top: 1px solid #aaa;">
+              <td><strong>Invoice Grand Total:</strong></td>
+              <td style="text-align: right; font-family: monospace; font-weight: bold;">₹\${state.invoiceTotal.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>TDS Amount Deduction (\${tdsSect}):</td>
+              <td style="text-align: right; font-family: monospace; color: #dc2626;">− ₹\${tdsAmt.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>Discount / Advances:</td>
+              <td style="text-align: right; font-family: monospace; color: #dc2626;">− ₹\${disc.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>Other Deductions:</td>
+              <td style="text-align: right; font-family: monospace; color: #dc2626;">− ₹\${otherDed.toFixed(2)}</td>
+            </tr>
+            <tr class="total-row">
+              <td><strong>Net Amount Paid:</strong></td>
+              <td style="text-align: right; font-family: monospace;">₹\${payAmt.toFixed(2)}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <div style="margin-bottom: 25px; padding: 10px; border: 1px solid #d4d9e0; border-radius: 4px; background: #faf9f7;">
+          <strong>Net Amount in Words:</strong> <span style="font-style: italic;">\${words}</span>
+        </div>
+        
+        <div class="timeline-card">
+          <div class="card-title">AP Transaction Audit Log (Timeline)</div>
+          \${timelineHtml}
+        </div>
+        
+        <div class="footer-sig">
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">AP Clerk (Prepared By)</div>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">AP Manager (Verified By)</div>
+          </div>
+          <div class="sig-block">
+            <div class="sig-line"></div>
+            <div class="sig-label">Finance Director (Authorized By)</div>
+          </div>
+        </div>
+        
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          }
+        <\/script>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+  }
+
+  // ── RESET STATE FOR NEW CYCLE ──
+  function resetForm() {
+    if (confirm("Are you sure you want to reset and start a new AP invoice process?")) {
+      location.reload();
+    }
+  }
+
+  // ── SAVE DRAFT PLACEHOLDER ──
+  function saveDraft(step) {
+    alert(`Draft saved successfully for Step ${step}. You can continue editing or return to this stage later.`);
+  }
+
+  // ── INIT ON LOAD ──
+  document.addEventListener("DOMContentLoaded", () => {
+    // Generate initial ID preview
+    generateInvoiceId();
+    
+    // Add default first line row
+    addRow();
+    
+    // Set default dates
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById("vendor-invoice-date-s1").value = `${yyyy}-${mm}-${dd}`;
+    
+    // Init state values
+    updateStepperUI();
+    updateBreadcrumb();
+  });
+</script>
+</body>
+</html>
